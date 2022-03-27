@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Genre extends Model {
+class Device extends Model {
   protected $hidden = ['created_at', 'updated_at', 'pivot'];
+  protected $casts = [
+    "description" => "array"
+  ];
 }

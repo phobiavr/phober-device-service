@@ -2,6 +2,7 @@
 
 use App\Http\Requests\Pageable;
 use App\Http\Resources\PaginationCollection;
+use App\Models\Device;
 use App\Models\Game;
 use App\Models\Genre;
 use Illuminate\Http\Request;
@@ -32,6 +33,12 @@ Route::get('/games', function (Pageable $request){
 
 Route::get('/genres', function (Request $request){
   $response = Genre::all();
+
+  return Response::json($response);
+});
+
+Route::get('/devices', function (Request $request){
+  $response = Device::all();
 
   return Response::json($response);
 });

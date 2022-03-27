@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -24,6 +25,7 @@ class Game extends Model implements HasMedia {
   protected $casts = ["multiplayer" => "boolean", "description" => "array"];
   protected $appends = ['preview'];
   protected $hidden = ['media', 'updated_at', 'created_at'];
+  protected $with = ['genres', 'devices'];
 
   public function media(): MorphMany {
     return $this->morphMany(config('media-library.media_model'), 'model');
@@ -43,5 +45,15 @@ class Game extends Model implements HasMedia {
     return Attribute::make(
       get: fn() => $this->getMedia('preview')->first()?->original_url
     );
+  }
+
+  public function genres(): BelongsToMany {
+    return $this
+      ->belongsToMany(Genre::class, 'game_genre');
+  }
+
+  public function devices(): BelongsToMany {
+    return $this
+      ->belongsToMany(Device::class, 'game_device');
   }
 }
