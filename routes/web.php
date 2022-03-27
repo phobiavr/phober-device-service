@@ -10,23 +10,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
 
 Route::middleware('auth.server')->get('/', function () {
   return Auth::guard('server')->user();
 });
 
 Route::get('/games', function (Pageable $request){
-  $response = PaginationCollection::make(Game::paginate($request))->jsonSerialize();
+  $response = PaginationCollection::make(Game::query()->paginateFromRequest($request))->jsonSerialize();
 
   return Response::json($response);
 });
@@ -39,6 +29,26 @@ Route::get('/genres', function (Request $request){
 
 Route::get('/devices', function (Request $request){
   $response = Device::all();
+
+  return Response::json($response);
+});
+
+Route::get('/gamesByDevice/{device}', function (Pageable $request, string $device){
+  $response = PaginationCollection::make(
+    Game::query()
+      ->whereRelation('devices', 'slug', $device)
+      ->paginateFromRequest($request)
+  )->jsonSerialize();
+
+  return Response::json($response);
+});
+
+Route::get('/gamesByGenre/{genre}', function (Pageable $request, string $genre){
+  $response = PaginationCollection::make(
+    Game::query()
+      ->whereRelation('genres', 'slug', $genre)
+      ->paginateFromRequest($request)
+  )->jsonSerialize();
 
   return Response::json($response);
 });
