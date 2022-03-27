@@ -1,7 +1,12 @@
 <?php
 
-use App\Http\Controllers\GameController;
+use App\Http\Requests\Pageable;
+use App\Http\Resources\PaginationCollection;
+use App\Models\Game;
+use App\Models\Genre;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,6 +24,14 @@ Route::middleware('auth.server')->get('/', function () {
   return Auth::guard('server')->user();
 });
 
-Route::prefix('/games')->group(function () {
-  Route::get('/', [GameController::class, 'index']);
+Route::get('/games', function (Pageable $request){
+  $response = PaginationCollection::make(Game::paginate($request))->jsonSerialize();
+
+  return Response::json($response);
+});
+
+Route::get('/genres', function (Request $request){
+  $response = Genre::all();
+
+  return Response::json($response);
 });

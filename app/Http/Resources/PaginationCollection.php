@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use JsonSerializable;
 
-class GameCollection extends ResourceCollection {
+class PaginationCollection extends ResourceCollection {
   /**
    * Transform the resource collection into an array.
    *
@@ -16,7 +16,7 @@ class GameCollection extends ResourceCollection {
    * @return array|Arrayable|JsonSerializable
    */
   public function toArray($request): array|JsonSerializable|Arrayable {
-    /** @var GameCollection|LengthAwarePaginator $this */
+    /** @var PaginationCollection|LengthAwarePaginator $this */
 
     return [
       'data' => $this->collection,

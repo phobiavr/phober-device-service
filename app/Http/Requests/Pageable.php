@@ -28,9 +28,7 @@ class Pageable extends FormRequest {
   public function passedValidation() {
     $this->merge([
       "perPage" => $this->get('size') ?? null,
-      // Will use in future
-      //"columns" => $this->get('columns') ?? ['*'],
-      "columns" => ['*'],
+      "columns" => $this->get('columns') ?? ['*'],
       // Will use in future
       //"pageName" => $this->get('page_name') ?? 'page',
       "pageName" => 'page',
