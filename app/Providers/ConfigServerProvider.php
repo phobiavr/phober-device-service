@@ -23,7 +23,7 @@ class ConfigServerProvider extends ServiceProvider {
   public function boot() {
     // https://github.com/vlucas/phpdotenv
 
-    $response = Http::get(env('CONFIG_SERVER_URL'));
+    $response = Http::get(env('CONFIG_SERVER'));
 
     self::setEnvironmentValue($response->json());
   }
