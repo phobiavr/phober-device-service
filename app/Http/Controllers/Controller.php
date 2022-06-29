@@ -19,7 +19,7 @@ use Illuminate\Routing\Controller as BaseController;
  * )
  *
  * @OA\Server(
- *      url="http://127.0.0.1:8300",
+ *      url="http://localhost:8300",
  *      description="localhost"
  * )
  *
