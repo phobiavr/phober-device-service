@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Requests\Pageable;
+use App\Http\Resources\GameResource;
 use App\Http\Resources\PaginationCollection;
 use App\Models\Device;
 use App\Models\Game;
@@ -16,9 +17,15 @@ Route::middleware('auth.server')->get('/', function () {
 });
 
 Route::get('/games', function (Pageable $request){
-  $response = PaginationCollection::make(Game::query()->paginateFromRequest($request))->jsonSerialize();
+  $list = Game::query()->paginateFromRequest($request);
 
-  return Response::json($response);
+  $response = new PaginationCollection($list, GameResource::class);
+
+  return Response::json($response->jsonSerialize());
+});
+
+Route::get('/games/{model}', function (Game $model){
+  return Response::json($model);
 });
 
 Route::get('/genres', function (Request $request){
@@ -33,22 +40,22 @@ Route::get('/devices', function (Request $request){
   return Response::json($response);
 });
 
-Route::get('/gamesByDevice/{device}', function (Pageable $request, string $device){
-  $response = PaginationCollection::make(
-    Game::query()
-      ->whereRelation('devices', 'slug', $device)
-      ->paginateFromRequest($request)
-  )->jsonSerialize();
+Route::get('/games-search/by-device/{device}', function (Pageable $request, string $device){
+  $list = Game::query()
+    ->whereRelation('devices', 'slug', $device)
+    ->paginateFromRequest($request);
 
-  return Response::json($response);
+  $response = new PaginationCollection($list, GameResource::class);
+
+  return Response::json($response->jsonSerialize());
 });
 
-Route::get('/gamesByGenre/{genre}', function (Pageable $request, string $genre){
-  $response = PaginationCollection::make(
-    Game::query()
-      ->whereRelation('genres', 'slug', $genre)
-      ->paginateFromRequest($request)
-  )->jsonSerialize();
+Route::get('/games-search/by-genre/{genre}', function (Pageable $request, string $genre){
+  $list = Game::query()
+    ->whereRelation('genres', 'slug', $genre)
+    ->paginateFromRequest($request);
 
-  return Response::json($response);
+  $response = new PaginationCollection($list, GameResource::class);
+
+  return Response::json($response->jsonSerialize());
 });

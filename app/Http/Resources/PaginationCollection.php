@@ -9,6 +9,21 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use JsonSerializable;
 
 class PaginationCollection extends ResourceCollection {
+
+  /**
+   * PaginationCollection constructor.
+   *
+   * @param mixed       $resource
+   * @param string|null $collects JsonResource
+   */
+  public function __construct($resource, string $collects = null) {
+    if ($collects){
+      $this->collects = $collects;
+    }
+
+    parent::__construct($resource);
+  }
+
   /**
    * Transform the resource collection into an array.
    *

@@ -49,7 +49,32 @@
                 "security": []
             }
         },
-        "/gamesByDevice/{device}": {
+        "/games/{id}": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Get Game by ID",
+                "operationId": "gameById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok"
+                    }
+                },
+                "security": []
+            }
+        },
+        "/games-search/by-device/{device}": {
             "get": {
                 "tags": [
                     "Games"
@@ -90,7 +115,7 @@
                 "security": []
             }
         },
-        "/gamesByGenre/{genre}": {
+        "/games-search/by-genre/{genre}": {
             "get": {
                 "tags": [
                     "Games"

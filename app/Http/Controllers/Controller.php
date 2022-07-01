@@ -53,8 +53,29 @@ use Illuminate\Routing\Controller as BaseController;
  * )
  *
  *
+
  * @OA\Get(
- *   path="/gamesByDevice/{device}",
+ *   path="/games/{id}",
+ *   summary="Get Game by ID",
+ *   operationId="gameById",
+ *   tags={"Games"},
+ *   security={},
+ *   @OA\Parameter(
+ *     name="id",
+ *     in="path",
+ *     required=true,
+ *     @OA\Schema(
+ *       type="integer"
+ *     )
+ *   ),
+ *   @OA\Response(
+ *     response="200",
+ *     description="ok",
+ *   )
+ * )
+ *
+ * @OA\Get(
+ *   path="/games-search/by-device/{device}",
  *   summary="Get Games by Device slug",
  *   operationId="gamesByDevice",
  *   tags={"Games"},
@@ -91,7 +112,7 @@ use Illuminate\Routing\Controller as BaseController;
  *
  *
  * @OA\Get(
- *   path="/gamesByGenre/{genre}",
+ *   path="/games-search/by-genre/{genre}",
  *   summary="Get Games by Genre slug",
  *   operationId="gamesByGenre",
  *   tags={"Games"},
