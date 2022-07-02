@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Requests\Pageable;
+use Abdukhaligov\LaravelPageable\Pageable;
 use App\Http\Resources\GameResource;
 use App\Http\Resources\PaginationCollection;
 use App\Models\Device;

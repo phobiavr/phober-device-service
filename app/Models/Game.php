@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Abdukhaligov\LaravelPageable\PaginateModel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
