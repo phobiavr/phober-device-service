@@ -59,3 +59,23 @@ Route::get('/games-search/by-genre/{genre}', function (Pageable $request, string
 
   return Response::json($response->jsonSerialize());
 });
+
+Route::get('/games-search/by-rating/{rating}', function (Pageable $request, int $rating){
+  $list = Game::query()
+    ->where('rating', '=', $rating)
+    ->paginateFromRequest($request);
+
+  $response = new PaginationCollection($list, GameResource::class);
+
+  return Response::json($response->jsonSerialize());
+});
+
+Route::get('/games-search/multiplayer', function (Pageable $request){
+  $list = Game::query()
+    ->where('multiplayer', '=', true)
+    ->paginateFromRequest($request);
+
+  $response = new PaginationCollection($list, GameResource::class);
+
+  return Response::json($response->jsonSerialize());
+});

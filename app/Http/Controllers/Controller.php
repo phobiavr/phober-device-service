@@ -53,7 +53,6 @@ use Illuminate\Routing\Controller as BaseController;
  * )
  *
  *
-
  * @OA\Get(
  *   path="/games/{id}",
  *   summary="Get Game by ID",
@@ -110,7 +109,6 @@ use Illuminate\Routing\Controller as BaseController;
  *   )
  * )
  *
- *
  * @OA\Get(
  *   path="/games-search/by-genre/{genre}",
  *   summary="Get Games by Genre slug",
@@ -147,6 +145,70 @@ use Illuminate\Routing\Controller as BaseController;
  *   )
  * )
  *
+ * @OA\Get(
+ *   path="/games-search/by-rating/{rating}",
+ *   summary="Get Games by Rating",
+ *   operationId="gamesByRating",
+ *   tags={"Games"},
+ *   security={},
+ *   @OA\Parameter(
+ *     name="rating",
+ *     in="path",
+ *     required=true,
+ *     @OA\Schema(
+ *       type="integer"
+ *     )
+ *   ),
+ *   @OA\Parameter(
+ *     name="size",
+ *     in="path",
+ *     required=false,
+ *     @OA\Schema(
+ *       type="integer"
+ *     )
+ *   ),
+ *   @OA\Parameter(
+ *     name="page",
+ *     in="path",
+ *     required=false,
+ *     @OA\Schema(
+ *       type="integer"
+ *     )
+ *   ),
+ *   @OA\Response(
+ *     response="200",
+ *     description="ok",
+ *   )
+ * )
+ *
+ *  @OA\Get(
+ *   path="/games-search/multiplayer",
+ *   summary="Get Multiplayer Games",
+ *   operationId="gamesMultiplayer",
+ *   tags={"Games"},
+ *   security={},
+ *   @OA\Parameter(
+ *     name="size",
+ *     in="path",
+ *     required=false,
+ *     @OA\Schema(
+ *       type="integer"
+ *     )
+ *   ),
+ *   @OA\Parameter(
+ *     name="page",
+ *     in="path",
+ *     required=false,
+ *     @OA\Schema(
+ *       type="integer"
+ *     )
+ *   ),
+ *   @OA\Response(
+ *     response="200",
+ *     description="ok",
+ *   )
+ * )
+ *
  *
  * @OA\Get(
  *   path="/devices",
@@ -159,6 +221,7 @@ use Illuminate\Routing\Controller as BaseController;
  *     description="ok",
  *   )
  * )
+ *
  *
  * @OA\Get(
  *   path="/genres",

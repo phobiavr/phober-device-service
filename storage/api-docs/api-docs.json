@@ -156,6 +156,80 @@
                 "security": []
             }
         },
+        "/games-search/by-rating/{rating}": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Get Games by Rating",
+                "operationId": "gamesByRating",
+                "parameters": [
+                    {
+                        "name": "rating",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "path",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "path",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok"
+                    }
+                },
+                "security": []
+            }
+        },
+        "/games-search/multiplayer": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Get Multiplayer Games",
+                "operationId": "gamesMultiplayer",
+                "parameters": [
+                    {
+                        "name": "size",
+                        "in": "path",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "path",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok"
+                    }
+                },
+                "security": []
+            }
+        },
         "/devices": {
             "get": {
                 "tags": [
