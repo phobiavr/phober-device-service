@@ -4,8 +4,58 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dea95be536524e78ed08018fd4b022ea",
+    "content-hash": "ee9b9b43d0a7cea940cfc277194a17a8",
     "packages": [
+        {
+            "name": "abdukhaligov/laravel-config-server-client",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Abdukhaligov/laravel-config-server-client.git",
+                "reference": "4c8f2268f6a6dcb5577e7d262f079e091ce2c18d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Abdukhaligov/laravel-config-server-client/zipball/4c8f2268f6a6dcb5577e7d262f079e091ce2c18d",
+                "reference": "4c8f2268f6a6dcb5577e7d262f079e091ce2c18d",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/framework": "^9.2",
+                "php": "^8.0.2"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Abdukhaligov\\LaravelConfigServerClient\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Abdukhaligov Hikmat",
+                    "email": "hikmat.pou@gmail.com",
+                    "homepage": "https://github.com/Abdukhaligov",
+                    "role": "Developer"
+                }
+            ],
+            "description": "The Config server client for Laravel.",
+            "homepage": "https://github.com/Abdukhaligov/laravel-config-server-client",
+            "keywords": [
+                "abdukhaligov",
+                "laravel",
+                "laravel-config-client"
+            ],
+            "support": {
+                "issues": "https://github.com/Abdukhaligov/laravel-config-server-client/issues",
+                "source": "https://github.com/Abdukhaligov/laravel-config-server-client/tree/master"
+            },
+            "time": "2022-07-02T14:10:55+00:00"
+        },
         {
             "name": "abdukhaligov/laravel-pageable",
             "version": "dev-master",
@@ -9129,6 +9179,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "abdukhaligov/laravel-config-server-client": 20,
         "abdukhaligov/laravel-pageable": 20
     },
     "prefer-stable": true,
