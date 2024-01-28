@@ -40,7 +40,7 @@ Route::get('/devices', function (Request $request){
   return Response::json($response);
 });
 
-Route::get('/games-search/by-device/{device}', function (Pageable $request, string $device){
+Route::get('/games/search/by-device/{device}', function (Pageable $request, string $device){
   $list = Game::query()
     ->whereRelation('devices', 'slug', $device)
     ->paginateFromRequest($request);
@@ -50,7 +50,7 @@ Route::get('/games-search/by-device/{device}', function (Pageable $request, stri
   return Response::json($response->jsonSerialize());
 });
 
-Route::get('/games-search/by-genre/{genre}', function (Pageable $request, string $genre){
+Route::get('/games/search/by-genre/{genre}', function (Pageable $request, string $genre){
   $list = Game::query()
     ->whereRelation('genres', 'slug', $genre)
     ->paginateFromRequest($request);
@@ -60,7 +60,7 @@ Route::get('/games-search/by-genre/{genre}', function (Pageable $request, string
   return Response::json($response->jsonSerialize());
 });
 
-Route::get('/games-search/by-rating/{rating}', function (Pageable $request, int $rating){
+Route::get('/games/search/by-rating/{rating}', function (Pageable $request, int $rating){
   $list = Game::query()
     ->where('rating', '=', $rating)
     ->paginateFromRequest($request);
@@ -70,7 +70,7 @@ Route::get('/games-search/by-rating/{rating}', function (Pageable $request, int 
   return Response::json($response->jsonSerialize());
 });
 
-Route::get('/games-search/multiplayer', function (Pageable $request){
+Route::get('/games/search/multiplayer', function (Pageable $request){
   $list = Game::query()
     ->where('multiplayer', '=', true)
     ->paginateFromRequest($request);

@@ -74,7 +74,7 @@
                 "security": []
             }
         },
-        "/games-search/by-device/{device}": {
+        "/games/search/by-device/{device}": {
             "get": {
                 "tags": [
                     "Games"
@@ -115,7 +115,7 @@
                 "security": []
             }
         },
-        "/games-search/by-genre/{genre}": {
+        "/games/search/by-genre/{genre}": {
             "get": {
                 "tags": [
                     "Games"
@@ -156,7 +156,7 @@
                 "security": []
             }
         },
-        "/games-search/by-rating/{rating}": {
+        "/games/search/by-rating/{rating}": {
             "get": {
                 "tags": [
                     "Games"
@@ -197,7 +197,7 @@
                 "security": []
             }
         },
-        "/games-search/multiplayer": {
+        "/games/search/multiplayer": {
             "get": {
                 "tags": [
                     "Games"
@@ -260,8 +260,5 @@
                 "security": []
             }
         }
-    },
-    "security": [
-        []
-    ]
+    }
 }

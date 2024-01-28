@@ -74,7 +74,7 @@ use Illuminate\Routing\Controller as BaseController;
  * )
  *
  * @OA\Get(
- *   path="/games-search/by-device/{device}",
+ *   path="/games/search/by-device/{device}",
  *   summary="Get Games by Device slug",
  *   operationId="gamesByDevice",
  *   tags={"Games"},
@@ -110,7 +110,7 @@ use Illuminate\Routing\Controller as BaseController;
  * )
  *
  * @OA\Get(
- *   path="/games-search/by-genre/{genre}",
+ *   path="/games/search/by-genre/{genre}",
  *   summary="Get Games by Genre slug",
  *   operationId="gamesByGenre",
  *   tags={"Games"},
@@ -146,7 +146,7 @@ use Illuminate\Routing\Controller as BaseController;
  * )
  *
  * @OA\Get(
- *   path="/games-search/by-rating/{rating}",
+ *   path="/games/search/by-rating/{rating}",
  *   summary="Get Games by Rating",
  *   operationId="gamesByRating",
  *   tags={"Games"},
@@ -182,7 +182,7 @@ use Illuminate\Routing\Controller as BaseController;
  * )
  *
  *  @OA\Get(
- *   path="/games-search/multiplayer",
+ *   path="/games/search/multiplayer",
  *   summary="Get Multiplayer Games",
  *   operationId="gamesMultiplayer",
  *   tags={"Games"},
