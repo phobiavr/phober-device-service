@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
+        "abdukhaligov/laravel-force-json": "dev-master",
         "abdukhaligov/laravel-config-server-client": "dev-master",
         "abdukhaligov/laravel-pageable": "dev-master",
         "darkaonline/l5-swagger": "^8.5",
