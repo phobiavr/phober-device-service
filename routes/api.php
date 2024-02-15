@@ -61,7 +61,6 @@ Route::post('/games/search', function (Pageable $request){
   return Response::json($response->jsonSerialize());
 });
 
-
 Route::get('/games/{model}', function (Game $model){
   return Response::json($model);
 });
