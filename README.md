@@ -1,4 +1,4 @@
-## <p align="center">Device-service</p>
+## Device-service
 
 The `device-service` within the <b>Phober</b> project focuses on displaying hardware-related data, device configurations, and game information.
 
