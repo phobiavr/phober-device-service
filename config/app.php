@@ -171,6 +171,7 @@ return [
      */
     \Abdukhaligov\LaravelForceJson\ForceJsonServiceProvider::class,
     L5Swagger\L5SwaggerServiceProvider::class,
+    \Shared\Package\PackageProvider::class,
 
     /*
      * Application Service Providers...

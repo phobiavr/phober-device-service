@@ -4,6 +4,12 @@
     "description": "The Laravel Framework.",
     "keywords": ["framework", "laravel"],
     "license": "MIT",
+    "repositories": [
+      {
+        "type": "path",
+        "url": "./shared"
+      }
+    ],
     "require": {
         "php": "^8.0.2",
         "abdukhaligov/laravel-force-json": "dev-master",
@@ -15,7 +21,8 @@
         "laravel/telescope": "^4.17",
         "laravel/tinker": "^2.7",
         "league/flysystem-aws-s3-v3": "^3.0",
-        "spatie/laravel-medialibrary": "^10.3"
+        "spatie/laravel-medialibrary": "^10.3",
+        "shared/package": "dev-main"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
