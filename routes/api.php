@@ -104,9 +104,3 @@ Route::get('/games/search/multiplayer', function (Pageable $request){
 
     return Response::json($response->jsonSerialize());
 });
-
-Route::get('/instance-info', function () {
-    return response()->json([
-        'instance_id' => gethostname(),
-    ]);
-});
