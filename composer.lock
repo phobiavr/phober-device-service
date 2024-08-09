@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5d667d4c8ba7355bffca437f474d5888",
+    "content-hash": "1a690c8ccbd0efd1e4ed010f506f82f2",
     "packages": [
         {
             "name": "abdukhaligov/laravel-config-server-client",
@@ -55,56 +55,6 @@
                 "source": "https://github.com/Abdukhaligov/laravel-config-server-client/tree/master"
             },
             "time": "2024-07-18T15:45:19+00:00"
-        },
-        {
-            "name": "abdukhaligov/laravel-pageable",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Abdukhaligov/laravel-pageable.git",
-                "reference": "a95d1ed3ff533f680e4c7ad3a5d0080a276b83c9"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Abdukhaligov/laravel-pageable/zipball/a95d1ed3ff533f680e4c7ad3a5d0080a276b83c9",
-                "reference": "a95d1ed3ff533f680e4c7ad3a5d0080a276b83c9",
-                "shasum": ""
-            },
-            "require": {
-                "laravel/framework": "*",
-                "php": "*"
-            },
-            "default-branch": true,
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Abdukhaligov\\LaravelPageable\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Abdukhaligov Hikmat",
-                    "email": "hikmat.pou@gmail.com",
-                    "homepage": "https://github.com/Abdukhaligov",
-                    "role": "Developer"
-                }
-            ],
-            "description": "The Pageable package for Laravel.",
-            "homepage": "https://github.com/Abdukhaligov/laravel-pageable",
-            "keywords": [
-                "abdukhaligov",
-                "laravel",
-                "laravel-pageable"
-            ],
-            "support": {
-                "issues": "https://github.com/Abdukhaligov/laravel-pageable/issues",
-                "source": "https://github.com/Abdukhaligov/laravel-pageable/tree/master"
-            },
-            "time": "2024-02-15T15:45:26+00:00"
         },
         {
             "name": "aws/aws-crt-php",
@@ -9369,7 +9319,6 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "abdukhaligov/laravel-config-server-client": 20,
-        "abdukhaligov/laravel-pageable": 20,
         "shared/package": 20
     },
     "prefer-stable": true,

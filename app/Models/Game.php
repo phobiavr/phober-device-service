@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
-use Abdukhaligov\LaravelPageable\PaginateModel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Shared\Pageable\Pageable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -19,8 +20,8 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property boolean multiplayer
  * @property string preview
  */
-class Game extends PaginateModel implements HasMedia {
-  use InteractsWithMedia;
+class Game extends Model implements HasMedia {
+  use InteractsWithMedia, Pageable;
 
   protected $casts = ["multiplayer" => "boolean", "description" => "array"];
   protected $appends = ['preview'];

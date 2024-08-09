@@ -1,41 +1,40 @@
 <?php
 
-use Abdukhaligov\LaravelPageable\Pageable;
 use App\Http\Resources\GameResource;
-use App\Http\Resources\PaginationCollection;
 use App\Models\Device;
 use App\Models\Game;
 use App\Models\Genre;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
+use Shared\Pageable\PageableCollection;
+use Shared\Pageable\PageableRequest;
 
-Route::middleware('auth.server')->get('/', function () {
+Route::middleware('auth.server')->get('', function () {
     return Auth::guard('server')->user();
 });
 
-Route::get('/games', function (Pageable $request){
-    $list = Game::query()->paginateFromRequest($request);
+Route::get('/games', function (PageableRequest $request){
+    $list = Game::paginateFromRequest($request);
 
-    $response = new PaginationCollection($list, GameResource::class);
+    $response = new PageableCollection($list, GameResource::class);
 
     return Response::json($response->jsonSerialize());
 });
 
-Route::get('/genres', function (Request $request){
+Route::get('/genres', function (){
     $response = Genre::all();
 
     return Response::json($response);
 });
 
-Route::get('/devices', function (Request $request){
+Route::get('/devices', function (){
     $response = Device::all();
 
     return Response::json($response);
 });
 
-Route::post('/games/search', function (Pageable $request){
+Route::post('/games/search', function (PageableRequest $request){
   $query = Game::query();
 
   if ($device = $request->get('device')) {
@@ -56,51 +55,10 @@ Route::post('/games/search', function (Pageable $request){
 
   $list = $query->paginateFromRequest($request);
 
-  $response = new PaginationCollection($list, GameResource::class);
 
-  return Response::json($response->jsonSerialize());
+  return Response::json(new PageableCollection($list, GameResource::class));
 });
 
 Route::get('/games/{model}', function (Game $model){
   return Response::json($model);
-});
-
-Route::get('/games/search/by-device/{device}', function (Pageable $request, string $device){
-    $list = Game::query()
-        ->whereRelation('devices', 'slug', $device)
-        ->paginateFromRequest($request);
-
-    $response = new PaginationCollection($list, GameResource::class);
-
-    return Response::json($response->jsonSerialize());
-});
-
-Route::get('/games/search/by-genre/{genre}', function (Pageable $request, string $genre){
-    $list = Game::query()
-        ->whereRelation('genres', 'slug', $genre)
-        ->paginateFromRequest($request);
-
-    $response = new PaginationCollection($list, GameResource::class);
-
-    return Response::json($response->jsonSerialize());
-});
-
-Route::get('/games/search/by-rating/{rating}', function (Pageable $request, int $rating){
-    $list = Game::query()
-        ->where('rating', '=', $rating)
-        ->paginateFromRequest($request);
-
-    $response = new PaginationCollection($list, GameResource::class);
-
-    return Response::json($response->jsonSerialize());
-});
-
-Route::get('/games/search/multiplayer', function (Pageable $request){
-    $list = Game::query()
-        ->where('multiplayer', '=', true)
-        ->paginateFromRequest($request);
-
-    $response = new PaginationCollection($list, GameResource::class);
-
-    return Response::json($response->jsonSerialize());
 });
