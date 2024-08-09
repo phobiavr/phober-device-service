@@ -12,7 +12,6 @@
     ],
     "require": {
         "php": "^8.0.2",
-        "abdukhaligov/laravel-config-server-client": "dev-master",
         "darkaonline/l5-swagger": "^8.5",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^9.19",

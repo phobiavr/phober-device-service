@@ -4,58 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1a690c8ccbd0efd1e4ed010f506f82f2",
+    "content-hash": "2f672e466fb70d96f12a75f4d40498b2",
     "packages": [
-        {
-            "name": "abdukhaligov/laravel-config-server-client",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Abdukhaligov/laravel-config-server-client.git",
-                "reference": "db61934f322f8e00c958886467df5eb2a36987d5"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Abdukhaligov/laravel-config-server-client/zipball/db61934f322f8e00c958886467df5eb2a36987d5",
-                "reference": "db61934f322f8e00c958886467df5eb2a36987d5",
-                "shasum": ""
-            },
-            "require": {
-                "laravel/framework": "*",
-                "php": "*"
-            },
-            "default-branch": true,
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Abdukhaligov\\LaravelConfigServerClient\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Abdukhaligov Hikmat",
-                    "email": "hikmat.pou@gmail.com",
-                    "homepage": "https://github.com/Abdukhaligov",
-                    "role": "Developer"
-                }
-            ],
-            "description": "The Config server client for Laravel.",
-            "homepage": "https://github.com/Abdukhaligov/laravel-config-server-client",
-            "keywords": [
-                "abdukhaligov",
-                "laravel",
-                "laravel-config-client"
-            ],
-            "support": {
-                "issues": "https://github.com/Abdukhaligov/laravel-config-server-client/issues",
-                "source": "https://github.com/Abdukhaligov/laravel-config-server-client/tree/master"
-            },
-            "time": "2024-07-18T15:45:19+00:00"
-        },
         {
             "name": "aws/aws-crt-php",
             "version": "v1.2.6",
@@ -9318,7 +9268,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "abdukhaligov/laravel-config-server-client": 20,
         "shared/package": 20
     },
     "prefer-stable": true,
