@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "37d8982540a9a4af1b957c12414aeeff",
+    "content-hash": "5d667d4c8ba7355bffca437f474d5888",
     "packages": [
         {
             "name": "abdukhaligov/laravel-config-server-client",
@@ -55,63 +55,6 @@
                 "source": "https://github.com/Abdukhaligov/laravel-config-server-client/tree/master"
             },
             "time": "2024-07-18T15:45:19+00:00"
-        },
-        {
-            "name": "abdukhaligov/laravel-force-json",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Abdukhaligov/laravel-force-json.git",
-                "reference": "7a7ab25234f182084d0b75ff184b122e85b20b9d"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Abdukhaligov/laravel-force-json/zipball/7a7ab25234f182084d0b75ff184b122e85b20b9d",
-                "reference": "7a7ab25234f182084d0b75ff184b122e85b20b9d",
-                "shasum": ""
-            },
-            "require": {
-                "laravel/framework": "*",
-                "php": "*"
-            },
-            "default-branch": true,
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Abdukhaligov\\LaravelForceJson\\ForceJsonServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Abdukhaligov\\LaravelForceJson\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Abdukhaligov Hikmat",
-                    "email": "hikmat.pou@gmail.com",
-                    "homepage": "https://github.com/Abdukhaligov",
-                    "role": "Developer"
-                }
-            ],
-            "description": "The Force json package for Laravel.",
-            "homepage": "https://github.com/Abdukhaligov/laravel-force-json",
-            "keywords": [
-                "abdukhaligov",
-                "laravel",
-                "laravel-force-json"
-            ],
-            "support": {
-                "issues": "https://github.com/Abdukhaligov/laravel-force-json/issues",
-                "source": "https://github.com/Abdukhaligov/laravel-force-json/tree/master"
-            },
-            "time": "2024-02-15T15:45:59+00:00"
         },
         {
             "name": "abdukhaligov/laravel-pageable",
@@ -3976,7 +3919,7 @@
             "dist": {
                 "type": "path",
                 "url": "./shared",
-                "reference": "b2234872c425ffa94c774e66476f85be4a36abec"
+                "reference": "1652e576e6f5f8b1e3e23ff33204028b027b1d7b"
             },
             "require": {
                 "laravel/framework": "*",
@@ -3985,7 +3928,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Shared\\Package\\": "src"
+                    "Shared\\": "src"
                 }
             },
             "license": [
@@ -9425,7 +9368,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "abdukhaligov/laravel-force-json": 20,
         "abdukhaligov/laravel-config-server-client": 20,
         "abdukhaligov/laravel-pageable": 20,
         "shared/package": 20
