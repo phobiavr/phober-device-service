@@ -46,7 +46,7 @@ return [
 
   'storage' => [
     'database' => [
-      'connection' => 'db_log',
+      'connection' => 'db_shared',
       'chunk' => 1000,
     ],
   ],

@@ -99,15 +99,6 @@ return [
       'username' => env('DB_MEDIA_USERNAME', 'forge'),
       'password' => env('DB_MEDIA_PASSWORD', ''),
     ],
-
-    'db_log' => [
-      'driver' => env('DB_LOG_CONNECTION', 'mysql'),
-      'host' => env('DB_LOG_HOST', '127.0.0.1'),
-      'port' => env('DB_LOG_PORT', '3306'),
-      'database' => env('DB_LOG_DATABASE', 'phober_log'),
-      'username' => env('DB_LOG_USERNAME', 'forge'),
-      'password' => env('DB_LOG_PASSWORD', ''),
-    ],
   ],
 
   /*
