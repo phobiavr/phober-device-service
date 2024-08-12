@@ -17,6 +17,23 @@ $app = new Illuminate\Foundation\Application(
 
 /*
 |--------------------------------------------------------------------------
+| Load Environment Variables
+|--------------------------------------------------------------------------
+|
+| We will load .env file first, and then .env.shared file.
+| The .env file will override any variables from .env.shared.
+|
+*/
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->safeLoad();
+
+if (file_exists(__DIR__ . '/../.env.shared')) {
+  Dotenv\Dotenv::createImmutable(__DIR__ . '/../', '.env.shared')->safeLoad();
+}
+
+/*
+|--------------------------------------------------------------------------
 | Bind Important Interfaces
 |--------------------------------------------------------------------------
 |
@@ -51,7 +68,5 @@ $app->singleton(
 | from the actual running of the application and sending responses.
 |
 */
-
-$app->loadEnvironmentFrom('.env.shared');
 
 return $app;
