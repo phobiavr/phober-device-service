@@ -9,37 +9,28 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider {
-  /**
-   * The path to the "home" route for your application.
-   *
-   * This is used by Laravel authentication to redirect users after login.
-   *
-   * @var string
-   */
-  public const HOME = '/home';
+    /**
+     * Define your route model bindings, pattern filters, etc.
+     *
+     * @return void
+     */
+    public function boot(): void {
+        $this->configureRateLimiting();
 
-  /**
-   * Define your route model bindings, pattern filters, etc.
-   *
-   * @return void
-   */
-  public function boot() {
-    $this->configureRateLimiting();
+        $this->routes(function () {
+            Route::middleware(['json'])
+                ->group(base_path('routes/api.php'));
+        });
+    }
 
-    $this->routes(function () {
-      Route::middleware(['api', 'json'])
-        ->group(base_path('routes/api.php'));
-    });
-  }
-
-  /**
-   * Configure the rate limiters for the application.
-   *
-   * @return void
-   */
-  protected function configureRateLimiting() {
-    RateLimiter::for('api', function (Request $request) {
-      return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
-    });
-  }
+    /**
+     * Configure the rate limiters for the application.
+     *
+     * @return void
+     */
+    protected function configureRateLimiting(): void {
+        RateLimiter::for('json', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+    }
 }
