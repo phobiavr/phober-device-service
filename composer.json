@@ -2,13 +2,16 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
+    "keywords": [
+        "framework",
+        "laravel"
+    ],
     "license": "MIT",
     "repositories": [
-      {
-        "type": "path",
-        "url": "./shared"
-      }
+        {
+            "type": "path",
+            "url": "./shared"
+        }
     ],
     "require": {
         "php": "^8.0.2",

@@ -3,5 +3,5 @@
 namespace App\Models;
 
 class Media extends \Spatie\MediaLibrary\MediaCollections\Models\Media {
-  protected $connection = "db_shared";
+    protected $connection = "db_shared";
 }

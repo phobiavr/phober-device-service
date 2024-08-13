@@ -21,40 +21,40 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property string preview
  */
 class Game extends Model implements HasMedia {
-  use InteractsWithMedia, Pageable;
+    use InteractsWithMedia, Pageable;
 
-  protected $casts = ["multiplayer" => "boolean", "description" => "array"];
-  protected $appends = ['preview'];
-  protected $hidden = ['media', 'updated_at', 'created_at'];
-  protected $with = ['genres', 'devices'];
+    protected $casts = ["multiplayer" => "boolean", "description" => "array"];
+    protected $appends = ['preview'];
+    protected $hidden = ['media', 'updated_at', 'created_at'];
+    protected $with = ['genres', 'devices'];
 
-  public function media(): MorphMany {
-    return $this->morphMany(config('media-library.media_model'), 'model');
-  }
+    public function media(): MorphMany {
+        return $this->morphMany(config('media-library.media_model'), 'model');
+    }
 
-  public function registerMediaCollections(): void {
-    $this->addMediaCollection('preview')->useDisk('media');
-  }
+    public function registerMediaCollections(): void {
+        $this->addMediaCollection('preview')->useDisk('media');
+    }
 
-  public function video(): Attribute {
-    return Attribute::make(
-      get: fn($value) => $value ? "https://www.youtube.com/watch?v=" . $value : null
-    );
-  }
+    public function video(): Attribute {
+        return Attribute::make(
+            get: fn($value) => $value ? "https://www.youtube.com/watch?v=" . $value : null
+        );
+    }
 
-  public function preview(): Attribute {
-    return Attribute::make(
-      get: fn() => $this->getMedia('preview')->first()?->original_url
-    );
-  }
+    public function preview(): Attribute {
+        return Attribute::make(
+            get: fn() => $this->getMedia('preview')->first()?->original_url
+        );
+    }
 
-  public function genres(): BelongsToMany {
-    return $this
-      ->belongsToMany(Genre::class, 'game_genre');
-  }
+    public function genres(): BelongsToMany {
+        return $this
+            ->belongsToMany(Genre::class, 'game_genre');
+    }
 
-  public function devices(): BelongsToMany {
-    return $this
-      ->belongsToMany(Device::class, 'game_device');
-  }
+    public function devices(): BelongsToMany {
+        return $this
+            ->belongsToMany(Device::class, 'game_device');
+    }
 }
