@@ -20,6 +20,7 @@ class GameResource extends JsonResource {
             "slug"        => $this->slug,
             "video"       => $this->video,
             "device"      => SimpleDeviceResource::collection($this->devices),
+            'description' => $this->description,
             "rating"      => $this->rating,
             "multiplayer" => $this->multiplayer,
             "preview"     => $this->preview,

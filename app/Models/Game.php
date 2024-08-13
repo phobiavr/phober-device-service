@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Shared\Pageable\Pageable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Translatable\HasTranslations;
 
 /**
  * @property integer id
@@ -21,9 +22,11 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property string preview
  */
 class Game extends Model implements HasMedia {
-    use InteractsWithMedia, Pageable;
+    use InteractsWithMedia, Pageable, HasTranslations;
 
-    protected $casts = ["multiplayer" => "boolean", "description" => "array"];
+    public array $translatable = ['description'];
+
+    protected $casts = ["multiplayer" => "boolean"];
     protected $appends = ['preview'];
     protected $hidden = ['media', 'updated_at', 'created_at'];
     protected $with = ['genres', 'devices'];
