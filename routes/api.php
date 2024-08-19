@@ -14,46 +14,43 @@ Route::middleware('auth.server')->get('', function () {
     return Auth::guard('server')->user();
 });
 
-Route::middleware('locale')->group(function () {
-    Route::get('/games', function (PageableRequest $request) {
-        $list = Game::paginateFromRequest($request);
+Route::get('/games', function (PageableRequest $request) {
+    $list = Game::paginateFromRequest($request);
 
-        $response = new PageableCollection($list, GameResource::class);
+    $response = new PageableCollection($list, GameResource::class);
 
-        return Response::json($response->jsonSerialize());
-    });
+    return Response::json($response->jsonSerialize());
+});
 
-    Route::post('/games/search', function (PageableRequest $request) {
-        $query = Game::query();
+Route::post('/games/search', function (PageableRequest $request) {
+    $query = Game::query();
 
-        if ($device = $request->get('device')) {
-            $query->whereRelation('devices', 'slug', $device);
-        }
+    if ($device = $request->get('device')) {
+        $query->whereRelation('devices', 'slug', $device);
+    }
 
-        if ($genre = $request->get('genre')) {
-            $query->whereRelation('genres', 'slug', $genre);
-        }
+    if ($genre = $request->get('genre')) {
+        $query->whereRelation('genres', 'slug', $genre);
+    }
 
-        if ($request->get('multiplayer')) {
-            $query->where('multiplayer', '=', true);
-        }
+    if ($request->get('multiplayer')) {
+        $query->where('multiplayer', '=', true);
+    }
 
-        if ($rating = $request->get('rating')) {
-            $query->where('rating', '=', $rating);
-        }
+    if ($rating = $request->get('rating')) {
+        $query->where('rating', '=', $rating);
+    }
 
-        $list = $query->paginateFromRequest($request);
+    $list = $query->paginateFromRequest($request);
 
 
-        return Response::json(new PageableCollection($list, GameResource::class));
-    });
+    return Response::json(new PageableCollection($list, GameResource::class));
+});
 
-    Route::get('/games/{id}', function (int $id) {
-        $game = Game::findOrFail($id);
+Route::get('/games/{id}', function (int $id) {
+    $game = Game::findOrFail($id);
 
-        return GameResource::make($game);
-    });
-
+    return GameResource::make($game);
 });
 
 Route::get('/genres', function () {
