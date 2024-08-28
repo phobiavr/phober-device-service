@@ -22,6 +22,12 @@ Route::get('/games', function (PageableRequest $request) {
     return Response::json($response->jsonSerialize());
 });
 
+Route::middleware('auth.server')->post('/schedule', function (\App\Http\Requests\ScheduleRequest $request) {
+    $schedule = \App\Models\Schedule::create($request->validated());
+
+    return Response::json($schedule);
+});
+
 Route::post('/games/search', function (PageableRequest $request) {
     $query = Game::query();
 
