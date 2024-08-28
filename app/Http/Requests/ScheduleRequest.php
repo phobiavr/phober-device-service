@@ -4,7 +4,9 @@ namespace App\Http\Requests;
 
 use App\Models\Schedule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Validator as ValidatorFacade;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 use Shared\Device\ScheduleEnum;
 
 class ScheduleRequest extends FormRequest {
@@ -14,7 +16,13 @@ class ScheduleRequest extends FormRequest {
      * @return array<string, mixed>
      */
     public function rules() {
-        \Illuminate\Support\Facades\Validator::extend('free', function ($attribute, $value, $parameters, \Illuminate\Validation\Validator $validator) {
+        /*
+         whereNull('start') and whereNull('end'): Checks if both start and end are null, which means the schedule is unrestricted.
+         where('end', '>=', $start): If end is not provided (null), check if the schedule ends after the proposed start.
+         where('start', '<=', $start): If end is not provided, check if the schedule starts before the proposed start.
+         where('start', '>=', $start): If end is provided, check if the schedule overlaps with the proposed start and end.
+         */
+        ValidatorFacade::extend('free', function ($attribute, $value, $parameters, Validator $validator) {
             $data = $validator->getData();
 
             $start = $data['start'];
