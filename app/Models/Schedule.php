@@ -18,7 +18,7 @@ class Schedule extends Model {
 
 
     protected $fillable = [
-        'type', 'instance_id'
+        'type', 'instance_id', 'start', 'end'
     ];
 
     protected $casts = [
