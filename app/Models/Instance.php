@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Instance extends Model {
     protected $table = 'device_instances';
-    protected $connection = "db_device";
     protected $casts = [
         'active'             => 'boolean',
         'deactivation_start' => 'datetime',
