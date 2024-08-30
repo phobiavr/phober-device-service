@@ -36,13 +36,11 @@ Route::get('/schedule', function (Request $request) {
 
     if ($id = $request->get('id')) {
         $query->where('id', $id);
-    }
-
-    if ($macAddress = $request->get('mac_address')) {
+    } elseif ($macAddress = $request->get('mac_address')) {
         $query->where('mac_address', $macAddress);
+    } else {
+        abort(ResponseFoundation::HTTP_UNPROCESSABLE_ENTITY);
     }
-
-    abort_if((!isset($id) && !isset($macAddress)), ResponseFoundation::HTTP_UNPROCESSABLE_ENTITY);
 
     $type = 'N/A';
     $countdown = 0;

@@ -38,16 +38,18 @@ class ScheduleRequest extends FormRequest {
                     })->orWhere(function ($query) use ($start, $end) {
                         $query->where('end', '>=', $start)
                             ->whereNull('start');
-
+                    })->orWhere(function ($query) use ($start, $end) {
                         if ($end !== null) {
-                            $query->where('end', '<=', $end);
+                            $query->where('end', '<=', $end)
+                                ->whereNull('start');
                         }
                     })->orWhere(function ($query) use ($start, $end) {
                         $query->where('start', '<=', $start)
                             ->whereNull('end');
-
+                    })->orWhere(function ($query) use ($start, $end) {
                         if ($end !== null) {
-                            $query->where('start', '>=', $end);
+                            $query->where('start', '>=', $end)
+                                ->whereNull('end');
                         }
                     })->orWhere(function ($query) use ($start, $end) {
                         if ($end === null) {
@@ -66,7 +68,7 @@ class ScheduleRequest extends FormRequest {
         return [
             'type'        => ['required', Rule::enum(ScheduleEnum::class)],
             'instance_id' => ['required', 'exists:device_instances,id'],
-            'start'       => ['required', 'date_format:Y-m-d H:i:s', 'after:now', 'free'],
+            'start'       => ['required', 'date_format:Y-m-d H:i:s', 'free'],
             'end'         => ['nullable', 'date', 'after:start'],
         ];
     }
