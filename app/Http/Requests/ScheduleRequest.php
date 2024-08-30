@@ -27,7 +27,10 @@ class ScheduleRequest extends FormRequest {
 
             $start = $data['start'];
             $end = $data['end'];
-            $instanceId = $data['instance_id'];
+
+            if (!$instanceId = ($data['instance_id'] ?? false)) {
+                return false;
+            }
 
             $conflictingSchedules = Schedule::query()
                 ->where('instance_id', $instanceId)
