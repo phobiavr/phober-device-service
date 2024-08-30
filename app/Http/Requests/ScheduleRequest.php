@@ -70,7 +70,7 @@ class ScheduleRequest extends FormRequest {
 
         return [
             'type'        => ['required', Rule::enum(ScheduleEnum::class)],
-            'instance_id' => ['required', 'exists:device_instances,id'],
+            'instance_id' => ['required', 'exists:instances,id'],
             'start'       => ['required', 'date_format:Y-m-d H:i:s', 'free'],
             'end'         => ['nullable', 'date', 'after:start'],
         ];

@@ -14,8 +14,6 @@ class Schedule extends Model {
     use Authorable;
 
     protected static $authorableType = 'device-schedule';
-    protected $table = 'device_instance_schedules';
-
 
     protected $fillable = [
         'type', 'instance_id', 'start', 'end'
