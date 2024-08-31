@@ -1,12 +1,17 @@
 <?php
 
+use App\Http\Requests\PriceRequest;
+use App\Http\Requests\ScheduleRequest;
 use App\Http\Resources\GameResource;
 use App\Http\Resources\InstanceResource;
 use App\Http\Resources\ScheduleResource;
+use App\Http\Resources\TariffPlanResource;
 use App\Models\Device;
 use App\Models\Game;
 use App\Models\Genre;
 use App\Models\Instance;
+use App\Models\Schedule;
+use App\Models\TariffPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
@@ -27,8 +32,8 @@ Route::get('/games', function (PageableRequest $request) {
     return Response::json($response->jsonSerialize());
 });
 
-Route::middleware('auth.server')->post('/schedule', function (\App\Http\Requests\ScheduleRequest $request) {
-    $schedule = \App\Models\Schedule::create($request->validated());
+Route::middleware('auth.server')->post('/schedule', function (ScheduleRequest $request) {
+    $schedule = Schedule::create($request->validated());
 
     return Response::json($schedule);
 });
@@ -41,6 +46,23 @@ Route::get('/schedule', function (Request $request) {
     $instance = Instance::findByIdOrMacAddress($id ?? null, $macAddress ?? null);
 
     return Response::json(ScheduleResource::make($instance?->getActiveSchedule()));
+});
+
+Route::get('/tariff-plans', function () {
+    $response = TariffPlan::all();
+
+    return Response::json(TariffPlanResource::collection($response));
+});
+
+Route::post('/price', function (PriceRequest $request) {
+    $deviceFromInstance = fn() => Instance::find($request->get('instance_id'))->device;
+
+    $plan = TariffPlan::query()
+        ->where('device', $request->get('device', $deviceFromInstance()))
+        ->where('tariff', $request->get('tariff'))
+        ->where('time', $request->get('time'))->get()->first();
+
+    return Response::json(TariffPlanResource::make($plan));
 });
 
 Route::get('/instances', function () {

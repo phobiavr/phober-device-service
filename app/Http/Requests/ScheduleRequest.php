@@ -59,8 +59,15 @@ class ScheduleRequest extends FormRequest {
                             $query->where('start', '>=', $start)
                                 ->where('end', '<=', $start);
                         } else {
-                            $query->where('start', '>=', $start)
-                                ->where('end', '<=', $end);
+                            $query
+                                ->orWhere(function ($query) use ($start) {
+                                    $query->where('start', '<=', $start)
+                                        ->where('end', '>=', $start);
+                                })
+                                ->orWhere(function ($query) use ($end) {
+                                    $query->where('start', '<=', $end)
+                                        ->where('end', '>=', $end);
+                                });
                         }
                     });
                 });
