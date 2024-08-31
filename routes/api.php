@@ -60,7 +60,7 @@ Route::post('/games/search', function (PageableRequest $request) {
     $query = Game::query();
 
     if ($device = $request->get('device')) {
-        $query->whereRelation('devices', 'slug', $device);
+        $query->whereRelation('devices', 'type', $device);
     }
 
     if ($genre = $request->get('genre')) {

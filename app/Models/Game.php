@@ -52,12 +52,10 @@ class Game extends Model implements HasMedia {
     }
 
     public function genres(): BelongsToMany {
-        return $this
-            ->belongsToMany(Genre::class, 'game_genre');
+        return $this->belongsToMany(Genre::class, 'game_genre', 'game_id', 'genre_id');
     }
 
     public function devices(): BelongsToMany {
-        return $this
-            ->belongsToMany(Device::class, 'game_device');
+        return $this->belongsToMany(Device::class, 'game_device', 'game_id', 'device', 'id', 'type');
     }
 }

@@ -30,12 +30,10 @@ class Instance extends Model {
     }
 
     public function getLabelAttribute(): string {
-        $deviceName = $this->device->name;
-
-        $position = self::where('device_id', $this->device_id)
+        $position = DeviceInstance::where('device', $this->device)
             ->where('id', '<=', $this->id)
             ->count();
 
-        return "{$deviceName} - {$position}";
+        return "{$this->device} - {$position}";
     }
 }
