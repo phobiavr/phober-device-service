@@ -68,9 +68,13 @@ class ScheduleRequest extends FormRequest {
             return !$conflictingSchedules->exists();
         }, 'The schedule conflicts with an existing schedule.');
 
+        $exists = Rule::exists('instances', 'id')->where(function ($query) {
+            $query->where('active', true);
+        });
+
         return [
             'type'        => ['required', Rule::enum(ScheduleEnum::class)],
-            'instance_id' => ['required', 'exists:instances,id'],
+            'instance_id' => ['required', $exists],
             'start'       => ['required', 'date_format:Y-m-d H:i:s', 'free'],
             'end'         => ['nullable', 'date', 'after:start'],
         ];

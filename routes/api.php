@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Resources\GameResource;
+use App\Http\Resources\InstanceResource;
+use App\Http\Resources\ScheduleResource;
 use App\Models\Device;
 use App\Models\Game;
 use App\Models\Genre;
@@ -32,28 +34,19 @@ Route::middleware('auth.server')->post('/schedule', function (\App\Http\Requests
 });
 
 Route::get('/schedule', function (Request $request) {
-    $query = Instance::query();
-
-    if ($id = $request->get('id')) {
-        $query->where('id', $id);
-    } elseif ($macAddress = $request->get('mac_address')) {
-        $query->where('mac_address', $macAddress);
-    } else {
+    if (!($id = $request->get('id')) && !($macAddress = $request->get('mac_address'))) {
         abort(ResponseFoundation::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    $type = 'N/A';
-    $countdown = 0;
+    $instance = Instance::findByIdOrMacAddress($id ?? null, $macAddress ?? null);
 
-    if (
-        ($instance = $query->first()) &&
-        ($schedule = $instance->activeSchedules()->orderBy('end', 'ASC')->get()->first())
-    ) {
-        $type = $schedule->type;
-        $countdown = $schedule->end ? $schedule->end->diffInSeconds(now()) : -1;
-    }
+    return Response::json(ScheduleResource::make($instance?->getActiveSchedule()));
+});
 
-    return Response::json(['type' => $type, 'countdown' => $countdown]);
+Route::get('/instances', function () {
+    $instances = Instance::all();
+
+    return Response::json(InstanceResource::collection($instances));
 });
 
 Route::post('/games/search', function (PageableRequest $request) {

@@ -13,20 +13,31 @@ class Instance extends Model {
         'deactivation_end'   => 'datetime',
     ];
 
+    protected $with = ['schedules'];
+
     public function schedules(): HasMany {
         return $this->hasMany(Schedule::class, 'instance_id');
     }
 
-    public function activeSchedules(): HasMany {
-        return $this->schedules()->active();
-    }
-
-    public function getActiveAttribute() {
-        return !$this->activeSchedules()->exists();
-    }
-
     public function device(): BelongsTo {
         return $this->belongsTo(Device::class);
+    }
+
+    public function getActiveSchedule() {
+        return $this->schedules->filter(function ($schedule) {
+            return $schedule->isActive();
+        })->sortBy('end')->first();
+    }
+
+    public static function findByIdOrMacAddress($id = null, $macAddress = null)
+    {
+        return static::when($id, function ($query, $id) {
+            $query->where('id', $id);
+        })
+            ->when($macAddress, function ($query, $macAddress) {
+                $query->where('mac_address', $macAddress);
+            })
+            ->first();
     }
 
     public function getLabelAttribute(): string {

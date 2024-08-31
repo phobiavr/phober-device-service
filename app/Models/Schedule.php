@@ -28,27 +28,7 @@ class Schedule extends Model {
         return $this->belongsTo(DeviceInstance::class);
     }
 
-    public function scopeActive($query) {
-        $now = now()->format('Y-m-d H:i:s');
-
-        return $query->where(function ($query) use ($now) {
-            $query->where(function ($query) {
-                $query->whereNull('start')
-                    ->whereNull('end');
-            })->orWhere(function ($query) use ($now) {
-                $query->whereNull('start')
-                    ->where('end', '>', $now);
-            })->orWhere(function ($query) use ($now) {
-                $query->where('start', '<', $now)
-                    ->whereNull('end');
-            })->orWhere(function ($query) use ($now) {
-                $query->where('start', '<', $now)
-                    ->where('end', '>', $now);
-            });
-        });
-    }
-
-    public function getIsActiveAttribute(): bool {
+    public function isActive(): bool {
         $now = now()->format('Y-m-d H:i:s');
 
         return (
