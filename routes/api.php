@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
+use Shared\Enums\ScheduleEnum;
 use Shared\Pageable\PageableCollection;
 use Shared\Pageable\PageableRequest;
 use Symfony\Component\HttpFoundation\Response as ResponseFoundation;
@@ -32,20 +33,28 @@ Route::get('/games', function (PageableRequest $request) {
     return Response::json($response->jsonSerialize());
 });
 
-Route::middleware('auth.server')->post('/schedule', function (ScheduleRequest $request) {
-    $schedule = Schedule::create($request->validated());
+Route::middleware('private')->group(function () {
+   Route::post('/schedule', function (ScheduleRequest $request) {
+       return Response::json(Schedule::create($request->validated()));
+   });
 
-    return Response::json($schedule);
-});
+    Route::get('/schedule', function (Request $request) {
+        if (!($id = $request->get('id')) && !($macAddress = $request->get('mac_address'))) {
+            abort(ResponseFoundation::HTTP_UNPROCESSABLE_ENTITY);
+        }
 
-Route::get('/schedule', function (Request $request) {
-    if (!($id = $request->get('id')) && !($macAddress = $request->get('mac_address'))) {
-        abort(ResponseFoundation::HTTP_UNPROCESSABLE_ENTITY);
-    }
+        $instance = Instance::findByIdOrMacAddress($id ?? null, $macAddress ?? null);
 
-    $instance = Instance::findByIdOrMacAddress($id ?? null, $macAddress ?? null);
+        return Response::json(ScheduleResource::make($instance?->getActiveSchedule()));
+    });
 
-    return Response::json(ScheduleResource::make($instance?->getActiveSchedule()));
+    Route::delete('/schedule/{id}', function ($id) {
+        $schedule = Schedule::where('type', '<>', ScheduleEnum::CANCELED->value)->findOrFail($id);
+        $schedule->type = ScheduleEnum::CANCELED;
+        $schedule->save();
+
+        return Response::json('', ResponseFoundation::HTTP_NO_CONTENT);
+    });
 });
 
 Route::get('/tariff-plans', function () {

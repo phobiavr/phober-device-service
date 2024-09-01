@@ -34,6 +34,7 @@ class ScheduleRequest extends FormRequest {
 
             $conflictingSchedules = Schedule::query()
                 ->where('instance_id', $instanceId)
+                ->where('type', '<>', ScheduleEnum::CANCELED->value)
                 ->where(function ($query) use ($start, $end) {
                     $query->where(function ($query) {
                         $query->whereNull('start')

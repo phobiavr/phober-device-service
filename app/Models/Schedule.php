@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Shared\Enums\ScheduleEnum;
 use Shared\Traits\Authorable;
 
 /**
@@ -31,7 +32,7 @@ class Schedule extends Model {
     public function isActive(): bool {
         $now = now()->format('Y-m-d H:i:s');
 
-        return (
+        return $this->type !== ScheduleEnum::CANCELED->value && (
             ($this->start === null && $this->end === null) ||
             ($this->start === null && $this->end > $now) ||
             ($this->start < $now && $this->end === null) ||
