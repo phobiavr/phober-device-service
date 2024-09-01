@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,6 +15,8 @@ class Instance extends Model {
     ];
 
     protected $with = ['schedules'];
+
+    public $session = null;
 
     public function schedules(): HasMany {
         return $this->hasMany(Schedule::class, 'instance_id');
@@ -29,15 +32,11 @@ class Instance extends Model {
         })->sortBy('end')->first();
     }
 
-    public static function findByIdOrMacAddress($id = null, $macAddress = null)
-    {
-        return static::when($id, function ($query, $id) {
-            $query->where('id', $id);
-        })
-            ->when($macAddress, function ($query, $macAddress) {
-                $query->where('mac_address', $macAddress);
-            })
-            ->first();
+    public static function findByIdOrMacAddressOrFail($idOrMacAddress): Model|Builder {
+        return static::query()
+            ->where('id', $idOrMacAddress)
+            ->orWhere('mac_address', $idOrMacAddress)
+            ->firstOrFail();
     }
 
     public function getLabelAttribute(): string {

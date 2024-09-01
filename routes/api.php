@@ -12,10 +12,10 @@ use App\Models\Genre;
 use App\Models\Instance;
 use App\Models\Schedule;
 use App\Models\TariffPlan;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
+use Shared\Clients\StaffClient;
 use Shared\Enums\ScheduleEnum;
 use Shared\Pageable\PageableCollection;
 use Shared\Pageable\PageableRequest;
@@ -34,18 +34,14 @@ Route::get('/games', function (PageableRequest $request) {
 });
 
 Route::middleware('private')->group(function () {
-   Route::post('/schedule', function (ScheduleRequest $request) {
-       return Response::json(Schedule::create($request->validated()));
-   });
+    Route::post('/schedule', function (ScheduleRequest $request) {
+        return Response::json(Schedule::create($request->validated()));
+    });
 
-    Route::get('/schedule', function (Request $request) {
-        if (!($id = $request->get('id')) && !($macAddress = $request->get('mac_address'))) {
-            abort(ResponseFoundation::HTTP_UNPROCESSABLE_ENTITY);
-        }
+    Route::get('/schedule/{idOrMacAddress}', function ($idOrMacAddress) {
+        $instance = Instance::findByIdOrMacAddressOrFail($idOrMacAddress);
 
-        $instance = Instance::findByIdOrMacAddress($id ?? null, $macAddress ?? null);
-
-        return Response::json(ScheduleResource::make($instance?->getActiveSchedule()));
+        return Response::json(ScheduleResource::make($instance->getActiveSchedule()));
     });
 
     Route::delete('/schedule/{id}', function ($id) {
@@ -78,6 +74,20 @@ Route::get('/instances', function () {
     $instances = Instance::all();
 
     return Response::json(InstanceResource::collection($instances));
+});
+
+Route::get('/instance/{idOrMacAddress}', function ($idOrMacAddress) {
+    $instance = Instance::findByIdOrMacAddressOrFail($idOrMacAddress);
+
+    if ($schedule = $instance->getActiveSchedule()) {
+        $sessionInfo = StaffClient::sessionByScheduleId($schedule->id);
+
+        if (!$sessionInfo->failed()) {
+            $instance->session = $sessionInfo->json();
+        }
+    }
+
+    return Response::json(InstanceResource::make($instance));
 });
 
 Route::post('/games/search', function (PageableRequest $request) {
