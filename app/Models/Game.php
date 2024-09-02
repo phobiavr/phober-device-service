@@ -24,20 +24,16 @@ use Spatie\Translatable\HasTranslations;
 class Game extends Model implements HasMedia {
     use InteractsWithMedia, Pageable, HasTranslations;
 
+    public function getMorphClass() {
+        return 'device-game';
+    }
+
     public array $translatable = ['description'];
 
     protected $casts = ["multiplayer" => "boolean"];
     protected $appends = ['preview'];
     protected $hidden = ['media', 'updated_at', 'created_at'];
     protected $with = ['genres', 'devices'];
-
-    public function media(): MorphMany {
-        return $this->morphMany(config('media-library.media_model'), 'model');
-    }
-
-    public function registerMediaCollections(): void {
-        $this->addMediaCollection('preview')->useDisk('media');
-    }
 
     public function video(): Attribute {
         return Attribute::make(
