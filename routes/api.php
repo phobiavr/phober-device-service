@@ -49,7 +49,7 @@ Route::middleware('private')->group(function () {
         $schedule->type = ScheduleEnum::CANCELED;
         $schedule->save();
 
-        return Response::json('', ResponseFoundation::HTTP_NO_CONTENT);
+        return Response::json(status: ResponseFoundation::HTTP_NO_CONTENT);
     });
 });
 
