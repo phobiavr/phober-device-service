@@ -4,12 +4,14 @@ use App\Http\Requests\PriceRequest;
 use App\Http\Requests\ScheduleRequest;
 use App\Http\Resources\GameResource;
 use App\Http\Resources\InstanceResource;
+use App\Http\Resources\PostResource;
 use App\Http\Resources\ScheduleResource;
 use App\Http\Resources\TariffPlanResource;
 use App\Models\Device;
 use App\Models\Game;
 use App\Models\Genre;
 use App\Models\Instance;
+use App\Models\Post;
 use App\Models\Schedule;
 use App\Models\TariffPlan;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +31,14 @@ Route::get('/games', function (PageableRequest $request) {
     $list = Game::paginateFromRequest($request);
 
     $response = new PageableCollection($list, GameResource::class);
+
+    return Response::json($response->jsonSerialize());
+});
+
+Route::get('/posts', function (PageableRequest $request) {
+    $list = Post::paginateFromRequest($request);
+
+    $response = new PageableCollection($list, PostResource::class);
 
     return Response::json($response->jsonSerialize());
 });
