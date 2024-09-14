@@ -33,7 +33,7 @@ class Game extends Model implements HasMedia {
     protected $casts = ["multiplayer" => "boolean"];
     protected $appends = ['preview'];
     protected $hidden = ['media', 'updated_at', 'created_at'];
-    protected $with = ['genres', 'devices'];
+    protected $with = ['genres', 'devices', 'media'];
 
     public function video(): Attribute {
         return Attribute::make(
