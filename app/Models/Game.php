@@ -24,10 +24,6 @@ use Spatie\Translatable\HasTranslations;
 class Game extends Model implements HasMedia {
     use InteractsWithMedia, Pageable, HasTranslations;
 
-    public function getMorphClass() {
-        return 'device-game';
-    }
-
     public array $translatable = ['description'];
 
     protected $casts = ["multiplayer" => "boolean"];
