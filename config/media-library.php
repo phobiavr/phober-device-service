@@ -28,7 +28,7 @@ return [
     /*
      * The fully qualified class name of the media model.
      */
-    'media_model'                               => \Shared\Media::class,
+    'media_model'                               => \Phobiavr\PhoberLaravelCommon\Media::class,
 
     /*
      * The fully qualified class name of the model used for temporary uploads.

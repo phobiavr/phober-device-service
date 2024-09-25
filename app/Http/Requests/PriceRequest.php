@@ -4,9 +4,9 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Shared\Enums\DeviceEnum;
-use Shared\Enums\SessionTariffEnum;
-use Shared\Enums\SessionTimeEnum;
+use Phobiavr\PhoberLaravelCommon\Enums\DeviceEnum;
+use Phobiavr\PhoberLaravelCommon\Enums\SessionTariffEnum;
+use Phobiavr\PhoberLaravelCommon\Enums\SessionTimeEnum;
 
 class PriceRequest extends FormRequest {
     /**

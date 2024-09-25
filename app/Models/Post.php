@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Shared\Pageable\Pageable;
+use Phobiavr\PhoberLaravelCommon\Pageable\Pageable;
 
 class Post extends Model {
     use Pageable;

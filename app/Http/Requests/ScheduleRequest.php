@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Validator as ValidatorFacade;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
-use Shared\Enums\ScheduleEnum;
+use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 
 class ScheduleRequest extends FormRequest {
     /**

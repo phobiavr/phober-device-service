@@ -17,10 +17,10 @@ use App\Models\TariffPlan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
-use Shared\Clients\StaffClient;
-use Shared\Enums\ScheduleEnum;
-use Shared\Pageable\PageableCollection;
-use Shared\Pageable\PageableRequest;
+use Phobiavr\PhoberLaravelCommon\Clients\StaffClient;
+use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
+use Phobiavr\PhoberLaravelCommon\Pageable\PageableCollection;
+use Phobiavr\PhoberLaravelCommon\Pageable\PageableRequest;
 use Symfony\Component\HttpFoundation\Response as ResponseFoundation;
 
 Route::middleware('auth.server')->get('', function () {
