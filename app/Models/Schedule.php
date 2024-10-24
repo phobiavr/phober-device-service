@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 use Phobiavr\PhoberLaravelCommon\Traits\Authorable;
 
 /**
@@ -12,8 +13,6 @@ use Phobiavr\PhoberLaravelCommon\Traits\Authorable;
  */
 class Schedule extends Model {
     use Authorable;
-
-    protected static $authorableType = 'device-schedule';
 
     protected $fillable = [
         'type', 'instance_id', 'start', 'end'
