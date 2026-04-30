@@ -16,9 +16,10 @@ class InstanceResource extends JsonResource {
     public function toArray($request) {
         return [
             "id"       => $this->id,
+            "label"    => $this->label,
             "device"   => $this->device,
             "active"   => $this->active,
-            "session" => $this->session,
+            "session"  => $this->session,
             'schedule' => ScheduleResource::make($this?->getActiveSchedule()),
         ];
     }
