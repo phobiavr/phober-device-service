@@ -6,6 +6,7 @@ use App\Http\Resources\GameResource;
 use App\Http\Resources\InstanceResource;
 use App\Http\Resources\PostResource;
 use App\Http\Resources\ScheduleResource;
+use App\Http\Resources\SimpleDeviceResource;
 use App\Http\Resources\TariffPlanResource;
 use App\Models\Device;
 use App\Models\Game;
@@ -138,7 +139,7 @@ Route::get('/genres', function () {
 });
 
 Route::get('/devices', function () {
-    $response = Device::all();
+    $response = Device::with('media')->get();
 
-    return Response::json($response);
+    return Response::json(SimpleDeviceResource::collection($response));
 });

@@ -20,7 +20,9 @@ class SimpleDeviceResource extends JsonResource {
         return [
             "id"   => $this->id,
             "name" => $this->name,
+            "type" => $this->type,
             "slug" => $this->slug,
+            "logo" => $this->getFirstMediaUrl('logo'),
         ];
     }
 }

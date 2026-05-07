@@ -15,8 +15,11 @@ class TariffPlanResource extends JsonResource {
      */
     public function toArray($request) {
         return [
-            "price"  => $this->price,
+            "id"     => $this->id,
             "device" => $this->device,
+            "tariff" => $this->tariff,
+            "time"   => $this->time,
+            "price"  => $this->price,
         ];
     }
 }
