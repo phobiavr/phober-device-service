@@ -1,145 +1,34 @@
 <?php
 
-use App\Http\Requests\PriceRequest;
-use App\Http\Requests\ScheduleRequest;
-use App\Http\Resources\GameResource;
-use App\Http\Resources\InstanceResource;
-use App\Http\Resources\PostResource;
-use App\Http\Resources\ScheduleResource;
-use App\Http\Resources\SimpleDeviceResource;
-use App\Http\Resources\TariffPlanResource;
-use App\Models\Device;
-use App\Models\Game;
-use App\Models\Genre;
-use App\Models\Instance;
-use App\Models\Post;
-use App\Models\Schedule;
-use App\Models\TariffPlan;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Response;
+use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\GameController;
+use App\Http\Controllers\GenreController;
+use App\Http\Controllers\InstanceController;
+use App\Http\Controllers\MeController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\TariffPlanController;
 use Illuminate\Support\Facades\Route;
-use Phobiavr\PhoberLaravelCommon\Clients\StaffClient;
-use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
-use Phobiavr\PhoberLaravelCommon\Pageable\PageableCollection;
-use Phobiavr\PhoberLaravelCommon\Pageable\PageableRequest;
-use Symfony\Component\HttpFoundation\Response as ResponseFoundation;
 
-Route::middleware('auth.server')->get('', function () {
-    return Auth::guard('server')->user();
-});
+Route::middleware('auth.server')->get('', [MeController::class, 'show']);
 
-Route::get('/games', function (PageableRequest $request) {
-    $list = Game::paginateFromRequest($request);
+Route::get('/games', [GameController::class, 'index']);
+Route::post('/games/search', [GameController::class, 'search']);
+Route::get('/games/{id}', [GameController::class, 'show']);
 
-    $response = new PageableCollection($list, GameResource::class);
-
-    return Response::json($response->jsonSerialize());
-});
-
-Route::get('/posts', function (PageableRequest $request) {
-    $list = Post::paginateFromRequest($request);
-
-    $response = new PageableCollection($list, PostResource::class);
-
-    return Response::json($response->jsonSerialize());
-});
+Route::get('/posts', [PostController::class, 'index']);
 
 Route::middleware('private')->group(function () {
-    Route::post('/schedule', function (ScheduleRequest $request) {
-        return Response::json(Schedule::create($request->validated()));
-    });
-
-    Route::get('/schedule/{idOrMacAddress}', function ($idOrMacAddress) {
-        $instance = Instance::findByIdOrMacAddressOrFail($idOrMacAddress);
-
-        return Response::json(ScheduleResource::make($instance->getActiveSchedule()));
-    });
-
-    Route::delete('/schedule/{id}', function ($id) {
-        $schedule = Schedule::where('type', '<>', ScheduleEnum::CANCELED->value)->findOrFail($id);
-        $schedule->type = ScheduleEnum::CANCELED;
-        $schedule->save();
-
-        return Response::json(status: ResponseFoundation::HTTP_NO_CONTENT);
-    });
+    Route::post('/schedule', [ScheduleController::class, 'store']);
+    Route::get('/schedule/{idOrMacAddress}', [ScheduleController::class, 'activeForInstance']);
+    Route::delete('/schedule/{id}', [ScheduleController::class, 'cancel']);
 });
 
-Route::get('/tariff-plans', function () {
-    $response = TariffPlan::all();
+Route::get('/tariff-plans', [TariffPlanController::class, 'index']);
+Route::post('/price', [TariffPlanController::class, 'price']);
 
-    return Response::json(TariffPlanResource::collection($response));
-});
+Route::get('/instances', [InstanceController::class, 'index']);
+Route::get('/instance/{idOrMacAddress}', [InstanceController::class, 'show']);
 
-Route::post('/price', function (PriceRequest $request) {
-    $deviceFromInstance = fn() => Instance::find($request->get('instance_id'))->device;
-
-    $plan = TariffPlan::query()
-        ->where('device', $request->get('device', $deviceFromInstance()))
-        ->where('tariff', $request->get('tariff'))
-        ->where('time', $request->get('time'))->get()->first();
-
-    return Response::json(TariffPlanResource::make($plan));
-});
-
-Route::get('/instances', function () {
-    $instances = Instance::all();
-
-    return Response::json(InstanceResource::collection($instances));
-});
-
-Route::get('/instance/{idOrMacAddress}', function ($idOrMacAddress) {
-    $instance = Instance::findByIdOrMacAddressOrFail($idOrMacAddress);
-
-    if ($schedule = $instance->getActiveSchedule()) {
-        $sessionInfo = StaffClient::sessionByScheduleId($schedule->id);
-
-        if (!$sessionInfo->failed()) {
-            $instance->session = $sessionInfo->json();
-        }
-    }
-
-    return Response::json(InstanceResource::make($instance));
-});
-
-Route::post('/games/search', function (PageableRequest $request) {
-    $query = Game::query();
-
-    if ($device = $request->get('device')) {
-        $query->whereRelation('devices', 'type', $device);
-    }
-
-    if ($genre = $request->get('genre')) {
-        $query->whereRelation('genres', 'slug', $genre);
-    }
-
-    if ($request->get('multiplayer')) {
-        $query->where('multiplayer', '=', true);
-    }
-
-    if ($rating = $request->get('rating')) {
-        $query->where('rating', '=', $rating);
-    }
-
-    $list = $query->paginateFromRequest($request);
-
-
-    return Response::json(new PageableCollection($list, GameResource::class));
-});
-
-Route::get('/games/{id}', function (int $id) {
-    $game = Game::findOrFail($id);
-
-    return GameResource::make($game);
-});
-
-Route::get('/genres', function () {
-    $response = Genre::all();
-
-    return Response::json($response);
-});
-
-Route::get('/devices', function () {
-    $response = Device::with('media')->get();
-
-    return Response::json(SimpleDeviceResource::collection($response));
-});
+Route::get('/genres', [GenreController::class, 'index']);
+Route::get('/devices', [DeviceController::class, 'index']);
