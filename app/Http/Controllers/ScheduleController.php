@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ScheduleUpdated;
 use App\Http\Requests\Schedule\StoreRequest;
 use App\Http\Resources\ScheduleResource;
 use App\Services\ScheduleService;
@@ -15,7 +16,11 @@ class ScheduleController extends BaseController {
     }
 
     public function store(StoreRequest $request): JsonResponse {
-        return Response::json($this->service->create($request->data()));
+        $schedule = $this->service->create($request->data());
+
+        //ScheduleUpdated::dispatch($schedule, 'created');
+
+        return Response::json($schedule);
     }
 
     public function activeForInstance(string $idOrMacAddress): JsonResponse {
@@ -23,7 +28,9 @@ class ScheduleController extends BaseController {
     }
 
     public function cancel(int $id): JsonResponse {
-        $this->service->cancel($id);
+        $schedule = $this->service->cancel($id);
+
+        ScheduleUpdated::dispatch($schedule, 'cancelled');
 
         return Response::json(status: ResponseFoundation::HTTP_NO_CONTENT);
     }
