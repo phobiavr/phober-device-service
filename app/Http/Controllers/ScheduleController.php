@@ -18,7 +18,7 @@ class ScheduleController extends BaseController {
     public function store(StoreRequest $request): JsonResponse {
         $schedule = $this->service->create($request->data());
 
-        //ScheduleUpdated::dispatch($schedule, 'created');
+        ScheduleUpdated::dispatch($schedule, 'created');
 
         return Response::json($schedule);
     }
