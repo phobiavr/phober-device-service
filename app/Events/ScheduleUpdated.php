@@ -3,8 +3,8 @@
 namespace App\Events;
 
 use App\Models\Schedule;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -26,9 +26,9 @@ class ScheduleUpdated implements ShouldBroadcastNow
         $this->action     = $action;
     }
 
-    public function broadcastOn(): Channel
+    public function broadcastOn(): PrivateChannel
     {
-        return new Channel('instances');
+        return new PrivateChannel('instances');
     }
 
     public function broadcastAs(): string
