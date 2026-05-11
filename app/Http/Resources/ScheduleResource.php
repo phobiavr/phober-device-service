@@ -19,12 +19,12 @@ class ScheduleResource extends JsonResource {
 
         if ($this->resource) {
             $type = $this->type;
-            $countdown = $this->end ? $this->end->diffInSeconds(now()) : -1;
+            $countdown = $this->end ? now()->diffInSeconds($this->end) : -1;
         }
 
         return [
             'type'      => $type,
-            'countdown' => $countdown,
+            'countdown' => (int) $countdown,
         ];
     }
 }

@@ -8,7 +8,7 @@ use Phobiavr\PhoberLaravelCommon\Clients\StaffClient;
 
 class InstanceService {
     public function all(): Collection {
-        return Instance::all();
+        return Instance::all()->sortBy('id');
     }
 
     public function findWithSession(string $idOrMacAddress): Instance {
