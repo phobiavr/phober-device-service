@@ -7,11 +7,11 @@ use App\Models\Schedule;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ScheduleUpdated implements ShouldBroadcastNow
+class ScheduleUpdated implements ShouldBroadcast
 {
     use Dispatchable;
     use InteractsWithSockets;
