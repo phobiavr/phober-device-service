@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Jobs\CleanOldSchedules;
 use App\Models\Device;
 use App\Models\Game;
 use App\Services\SessionScheduleHandler;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\ServiceProvider;
 use Phobiavr\PhoberLaravelCommon\Contracts\SessionScheduleHandlerInterface;
 
@@ -29,5 +31,7 @@ class AppServiceProvider extends ServiceProvider {
             'device-game' => Game::class,
             'device-model' => Device::class,
         ]);
+
+        Schedule::job(CleanOldSchedules::class)->hourly();
     }
 }
