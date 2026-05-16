@@ -6,9 +6,11 @@ use App\Events\ScheduleUpdated;
 use App\Listeners\BroadcastScheduleChanged;
 use App\Models\Device;
 use App\Models\Game;
+use App\Services\SessionScheduleHandler;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Phobiavr\PhoberLaravelCommon\Contracts\SessionScheduleHandlerInterface;
 
 class AppServiceProvider extends ServiceProvider {
     /**
@@ -16,8 +18,8 @@ class AppServiceProvider extends ServiceProvider {
      *
      * @return void
      */
-    public function register() {
-        //
+    public function register(): void {
+        $this->app->bind(SessionScheduleHandlerInterface::class, SessionScheduleHandler::class);
     }
 
     /**
