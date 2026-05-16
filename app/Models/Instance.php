@@ -16,8 +16,6 @@ class Instance extends Model {
 
     protected $with = ['schedules'];
 
-    public $session = null;
-
     public function schedules(): HasMany {
         return $this->hasMany(Schedule::class, 'instance_id');
     }
@@ -27,9 +25,7 @@ class Instance extends Model {
     }
 
     public function getActiveSchedule() {
-        return $this->schedules->filter(function ($schedule) {
-            return $schedule->isActive();
-        })->sortBy('end')->first();
+        return $this->schedules->filter(fn($schedule) => $schedule->isActive())->sortBy('end')->first();
     }
 
     public static function findByIdOrMacAddressOrFail($idOrMacAddress): Model|Builder {

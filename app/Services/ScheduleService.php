@@ -7,8 +7,15 @@ use App\Models\Schedule;
 use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 
 class ScheduleService {
-    public function create(array $data): Schedule {
-        return Schedule::create($data);
+    public function save(ScheduleEnum $type, int $instanceId, ?int $minutes = null, ?Schedule $schedule = null): Schedule {
+        $schedule ??= new Schedule(['instance_id' => $instanceId]);
+
+        $schedule->type  = $type;
+        $schedule->start = now();
+        $schedule->end   = $minutes ? now()->addMinutes($minutes) : null;
+        $schedule->save();
+
+        return $schedule;
     }
 
     public function activeForInstance(string $idOrMacAddress): ?Schedule {

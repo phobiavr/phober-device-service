@@ -8,6 +8,7 @@ use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 use Phobiavr\PhoberLaravelCommon\Traits\Authorable;
 
 /**
+ * @property ScheduleEnum $type
  * @property \DateTime $start
  * @property \DateTime $end
  */
