@@ -24,7 +24,8 @@
         "phobiavr/phober-laravel-common": "^0.1.0",
         "predis/predis": "^3.4",
         "spatie/laravel-medialibrary": "*",
-        "spatie/laravel-translatable": "*"
+        "spatie/laravel-translatable": "*",
+        "vladimir-yuldashev/laravel-queue-rabbitmq": "^14.5"
     },
     "autoload": {
         "psr-4": {
