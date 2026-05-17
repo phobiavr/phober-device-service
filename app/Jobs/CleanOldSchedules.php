@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 
-class CleanOldSchedules implements ShouldQueue {
+class CleanOldSchedules {
     use Queueable;
 
     public function handle(): void {
