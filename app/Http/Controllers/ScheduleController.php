@@ -14,6 +14,7 @@ class ScheduleController extends BaseController {
     public function __construct(private readonly ScheduleService $service) {
     }
 
+    //TODO:: refactor
     public function store(StoreRequest $request): JsonResponse {
         $schedule = $this->service->create($request->data());
 

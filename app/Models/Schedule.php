@@ -11,12 +11,13 @@ use Phobiavr\PhoberLaravelCommon\Traits\Authorable;
  * @property ScheduleEnum $type
  * @property \DateTime $start
  * @property \DateTime $end
+ * @property int|null $session_id
  */
 class Schedule extends Model {
     use Authorable;
 
     protected $fillable = [
-        'type', 'instance_id', 'start', 'end'
+        'type', 'instance_id', 'start', 'end', 'session_id',
     ];
 
     protected $casts = [

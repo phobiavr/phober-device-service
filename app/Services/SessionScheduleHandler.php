@@ -11,7 +11,7 @@ class SessionScheduleHandler implements SessionScheduleHandlerInterface
 {
     public function __construct(private readonly ScheduleService $scheduleService) {}
 
-    public function handle(int $instanceId, string $action, ?int $time): void
+    public function handle(int $instanceId, string $action, ?int $time, ?int $sessionId): void
     {
         /** @var Instance $instance */
         $instance = Instance::find($instanceId);
@@ -39,10 +39,10 @@ class SessionScheduleHandler implements SessionScheduleHandlerInterface
         }
 
         if ($action === 'queue') {
-            $schedule = $this->scheduleService->save(ScheduleEnum::QUEUE, $instanceId);
+            $schedule = $this->scheduleService->save(ScheduleEnum::QUEUE, $instanceId, sessionId: $sessionId);
             ScheduleUpdated::dispatch($schedule, 'created');
         } elseif ($action === 'start') {
-            $schedule = $this->scheduleService->save(ScheduleEnum::IN_SESSION, $instanceId, $time);
+            $schedule = $this->scheduleService->save(ScheduleEnum::IN_SESSION, $instanceId, $time, sessionId: $sessionId);
             ScheduleUpdated::dispatch($schedule, 'created');
         }
     }
