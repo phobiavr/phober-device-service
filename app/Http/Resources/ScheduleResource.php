@@ -3,16 +3,12 @@
 namespace App\Http\Resources;
 
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ScheduleResource extends JsonResource {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param Request $request
-     * @return array|Arrayable|\JsonSerializable
-     */
+    public ?string $servicedByName = null;
+    public ?string $customer = null;
+
     public function toArray($request) {
         $type = 'N/A';
         $countdown = 0;
@@ -23,8 +19,10 @@ class ScheduleResource extends JsonResource {
         }
 
         return [
-            'type'      => $type,
-            'countdown' => (int) $countdown,
+            'type'             => $type,
+            'countdown'        => (int) $countdown,
+            'serviced_by_name' => $this->servicedByName,
+            'customer'         => $this->customer,
         ];
     }
 }

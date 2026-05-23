@@ -8,6 +8,7 @@ use App\Services\ScheduleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Response;
+use Phobiavr\PhoberLaravelCommon\Clients\StaffClient;
 use Symfony\Component\HttpFoundation\Response as ResponseFoundation;
 
 class ScheduleController extends BaseController {
@@ -22,7 +23,20 @@ class ScheduleController extends BaseController {
     }
 
     public function activeForInstance(string $idOrMacAddress): JsonResponse {
-        return Response::json(ScheduleResource::make($this->service->activeForInstance($idOrMacAddress)));
+        $schedule = $this->service->activeForInstance($idOrMacAddress);
+
+        $resource = ScheduleResource::make($schedule);
+
+        if ($schedule?->session_id) {
+            $response = StaffClient::sessionById($schedule->session_id);
+            if ($response->ok()) {
+                $data = json_decode($response->body());
+                $resource->servicedByName = $data->serviced_by_name ?? null;
+                $resource->customer = $data->customer ?? null;
+            }
+        }
+
+        return Response::json($resource);
     }
 
     public function cancel(int $id): JsonResponse {
