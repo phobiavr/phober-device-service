@@ -7,12 +7,14 @@ use App\Models\Schedule;
 use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 
 class ScheduleService {
-    public function save(ScheduleEnum $type, int $instanceId, ?int $minutes = null, ?Schedule $schedule = null, ?int $sessionId = null): Schedule {
+    public function save(ScheduleEnum $type, int $instanceId, ?int $minutes = null, ?Schedule $schedule = null, ?int $sessionId = null, ?string $startedAt = null): Schedule {
         $schedule ??= new Schedule(['instance_id' => $instanceId]);
 
+        $start = $startedAt ? \Carbon\Carbon::parse($startedAt) : now();
+
         $schedule->type = $type;
-        $schedule->start = now();
-        $schedule->end = $minutes ? now()->addMinutes($minutes) : null;
+        $schedule->start = $start;
+        $schedule->end = $minutes ? $start->copy()->addMinutes($minutes) : null;
         if ($sessionId) {
             $schedule->session_id = $sessionId;
         }
