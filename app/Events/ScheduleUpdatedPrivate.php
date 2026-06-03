@@ -36,6 +36,7 @@ class ScheduleUpdatedPrivate implements ShouldBroadcast
         $type      = 'N/A';
         $countdown = 0;
 
+        /** @var Instance $instance */
         $instance = Instance::find($this->instanceId);
         $schedule = $instance?->getActiveSchedule();
 
@@ -44,12 +45,23 @@ class ScheduleUpdatedPrivate implements ShouldBroadcast
             $countdown = $schedule->end ? now()->diffInSeconds($schedule->end) : -1;
         }
 
+        $upcomingType = null;
+        $startsIn     = null;
+
+        $upcoming = $instance?->getUpcomingSchedule();
+        if ($upcoming) {
+            $upcomingType = $upcoming->type;
+            $startsIn     = (int) now()->diffInSeconds($upcoming->start);
+        }
+
         return [
-            'schedule_id' => $this->scheduleId,
-            'instance_id' => $this->instanceId,
-            'action'      => $this->action,
-            'type'        => $type,
-            'countdown'   => (int) $countdown,
+            'schedule_id'   => $this->scheduleId,
+            'instance_id'   => $this->instanceId,
+            'action'        => $this->action,
+            'type'          => $type,
+            'countdown'     => (int) $countdown,
+            'upcoming_type' => $upcomingType,
+            'starts_in'     => $startsIn,
         ];
     }
 }

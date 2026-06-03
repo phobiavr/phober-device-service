@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Jobs\NotifyUpcomingSchedules;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 
 class Instance extends Model {
     protected $casts = [
@@ -24,8 +26,22 @@ class Instance extends Model {
         return $this->belongsTo(Device::class);
     }
 
-    public function getActiveSchedule() {
+    public function getActiveSchedule(): ?Schedule {
         return $this->schedules->filter(fn($schedule) => $schedule->isActive())->sortBy('end')->first();
+    }
+
+    public function getUpcomingSchedule(): ?Schedule {
+        $window = now()->addMinutes(NotifyUpcomingSchedules::WINDOW_MINUTES);
+
+        return $this->schedules
+            ->filter(fn($schedule) =>
+                $schedule->type !== ScheduleEnum::CANCELED->value &&
+                $schedule->start !== null &&
+                $schedule->start > now() &&
+                $schedule->start <= $window
+            )
+            ->sortBy('start')
+            ->first();
     }
 
     public static function findByIdOrMacAddressOrFail($idOrMacAddress): Model|Builder {
