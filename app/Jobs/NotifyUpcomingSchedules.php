@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Events\ScheduleUpdatedPrivate;
-use App\Events\ScheduleUpdatedPublic;
+use App\Events\Broadcast\ScheduleUpdatedPrivate;
+use App\Events\Broadcast\ScheduleUpdatedPublic;
 use App\Models\Schedule;
 use Illuminate\Foundation\Queue\Queueable;
 use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;

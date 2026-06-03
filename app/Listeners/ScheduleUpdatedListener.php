@@ -2,15 +2,15 @@
 
 namespace App\Listeners;
 
+use App\Events\Broadcast\ScheduleUpdatedPrivate;
+use App\Events\Broadcast\ScheduleUpdatedPublic;
 use App\Events\ScheduleUpdated;
-use App\Events\ScheduleUpdatedPrivate;
-use App\Events\ScheduleUpdatedPublic;
 
 class ScheduleUpdatedListener
 {
     public function handle(ScheduleUpdated $event): void
     {
-        broadcast(new ScheduleUpdatedPublic($event->instanceId));
-        broadcast(new ScheduleUpdatedPrivate($event->scheduleId, $event->instanceId, $event->action));
+        broadcast(new ScheduleUpdatedPublic($event->schedule));
+        broadcast(new ScheduleUpdatedPrivate($event->schedule, $event->action));
     }
 }

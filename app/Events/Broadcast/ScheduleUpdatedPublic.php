@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Events;
+namespace App\Events\Broadcast;
 
 use App\Models\Instance;
+use App\Models\Schedule;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -15,13 +16,13 @@ class ScheduleUpdatedPublic implements ShouldBroadcast
     use InteractsWithSockets;
     use SerializesModels;
 
-    public function __construct(public readonly int $instanceId) {}
+    public function __construct(public readonly Schedule $schedule) {}
 
     public function broadcastOn(): array
     {
         $channels = [new Channel('instances')];
 
-        $mac = Instance::query()->whereKey($this->instanceId)->value('mac_address');
+        $mac = Instance::query()->whereKey($this->schedule->instance_id)->value('mac_address');
         if ($mac) {
             $slug = strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $mac));
             $channels[] = new Channel('schedule.' . $slug);
