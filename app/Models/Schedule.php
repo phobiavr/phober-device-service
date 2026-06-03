@@ -11,6 +11,7 @@ use Phobiavr\PhoberLaravelCommon\Traits\Authorable;
  * @property ScheduleEnum $type
  * @property \DateTime $start
  * @property \DateTime $end
+ * @property int $instance_id
  * @property int|null $session_id
  */
 class Schedule extends Model {

@@ -27,7 +27,7 @@ class Instance extends Model {
     }
 
     public function getActiveSchedule(): ?Schedule {
-        return $this->schedules->filter(fn($schedule) => $schedule->isActive())->sortBy('end')->first();
+        return $this->schedules->filter(fn(Schedule $schedule) => $schedule->isActive())->sortBy('end')->first();
     }
 
     public function getUpcomingSchedule(): ?Schedule {

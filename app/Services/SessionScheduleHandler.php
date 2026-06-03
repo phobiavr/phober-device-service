@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Events\ScheduleUpdated;
 use App\Models\Instance;
+use App\Models\Schedule;
 use Phobiavr\PhoberLaravelCommon\Contracts\SessionScheduleHandlerInterface;
 use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 
@@ -17,6 +18,7 @@ class SessionScheduleHandler implements SessionScheduleHandlerInterface
         $instance = Instance::find($instanceId);
         if (!$instance) return;
 
+        /** @var Schedule $active */
         $active = $instance->getActiveSchedule();
 
         if ($active?->type === ScheduleEnum::QUEUE->value) {
