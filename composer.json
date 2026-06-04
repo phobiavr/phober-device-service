@@ -23,6 +23,7 @@
         "league/flysystem-aws-s3-v3": "^3.28",
         "phobiavr/phober-laravel-common": "^0.1.0",
         "predis/predis": "^3.4",
+        "sentry/sentry-laravel": "^4.25",
         "spatie/laravel-medialibrary": "*",
         "spatie/laravel-translatable": "*",
         "vladimir-yuldashev/laravel-queue-rabbitmq": "^14.5"
