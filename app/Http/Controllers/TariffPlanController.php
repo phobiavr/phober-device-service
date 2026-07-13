@@ -18,7 +18,7 @@ class TariffPlanController extends BaseController {
     }
 
     public function price(ShowRequest $request): JsonResponse {
-        $plan = $this->service->find($request->device(), $request->tariff(), $request->time());
+        $plan = $this->service->find($request->payload());
 
         return Response::json(TariffPlanResource::make($plan));
     }

@@ -17,7 +17,7 @@ class ScheduleController extends BaseController {
 
     //TODO:: refactor
     public function store(StoreRequest $request): JsonResponse {
-        $schedule = $this->service->create($request->data());
+        $schedule = $this->service->create($request->payload());
 
         return Response::json($schedule);
     }

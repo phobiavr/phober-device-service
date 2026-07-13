@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Price;
 
-use App\Models\Instance;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Phobiavr\PhoberLaravelCommon\Data\PricePayload;
 use Phobiavr\PhoberLaravelCommon\Enums\DeviceEnum;
 use Phobiavr\PhoberLaravelCommon\Enums\SessionTariffEnum;
 use Phobiavr\PhoberLaravelCommon\Enums\SessionTimeEnum;
@@ -19,19 +19,7 @@ class ShowRequest extends FormRequest {
         ];
     }
 
-    public function device(): string {
-        if ($device = $this->input('device')) {
-            return $device;
-        }
-
-        return Instance::findOrFail($this->input('instance_id'))->device;
-    }
-
-    public function tariff(): string {
-        return $this->input('tariff');
-    }
-
-    public function time(): string {
-        return $this->input('time');
+    public function payload(): PricePayload {
+        return PricePayload::fromArray($this->validated());
     }
 }

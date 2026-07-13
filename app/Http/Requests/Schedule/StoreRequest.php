@@ -7,6 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Validator as ValidatorFacade;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
+use Phobiavr\PhoberLaravelCommon\Data\SchedulePayload;
 use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 
 class StoreRequest extends FormRequest {
@@ -65,7 +66,7 @@ class StoreRequest extends FormRequest {
         ];
     }
 
-    public function data(): array {
-        return $this->validated();
+    public function payload(): SchedulePayload {
+        return SchedulePayload::fromArray($this->validated());
     }
 }
