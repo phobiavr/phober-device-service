@@ -8,6 +8,7 @@ use App\Http\Controllers\MeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\TariffPlanController;
+use App\Http\Middleware\OverlaySecretMiddleware;
 use Illuminate\Support\Facades\Route;
 
 
@@ -25,7 +26,7 @@ Route::middleware('private')->prefix('/schedule')->group(function () {
     Route::delete('/{id}', [ScheduleController::class, 'cancel']);
 });
 
-Route::middleware(['overlay', 'throttle:30,1'])
+Route::middleware([OverlaySecretMiddleware::class, 'throttle:30,1'])
     ->get('/schedule/{macAddress}', [ScheduleController::class, 'activeForInstanceByMac']);
 
 Route::get('/tariff-plans', [TariffPlanController::class, 'index']);

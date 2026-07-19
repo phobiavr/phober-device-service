@@ -19,8 +19,8 @@ class NotifyUpcomingSchedules {
             ->where('type', '!=', ScheduleEnum::CANCELED->value)
             ->get()
             ->each(function ($schedule) {
-                broadcast(new ScheduleUpdatedPrivate($schedule->id, $schedule->instance_id, 'upcoming'));
-                broadcast(new ScheduleUpdatedPublic($schedule->instance_id));
+                broadcast(new ScheduleUpdatedPrivate($schedule, 'upcoming'));
+                broadcast(new ScheduleUpdatedPublic($schedule));
             });
     }
 }
