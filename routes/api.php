@@ -19,11 +19,11 @@ Route::get('/games/{id}', [GameController::class, 'show']);
 
 Route::get('/posts', [PostController::class, 'index']);
 
-//Route::middleware('private')->group(function () {
-    Route::post('/schedule', [ScheduleController::class, 'store']);
-    Route::get('/schedule/{idOrMacAddress}', [ScheduleController::class, 'activeForInstance']);
-    Route::delete('/schedule/{id}', [ScheduleController::class, 'cancel']);
-//});
+Route::middleware('private')->prefix('/schedule')->group(function () {
+    Route::post('/', [ScheduleController::class, 'store']);
+    Route::get('/{idOrMacAddress}', [ScheduleController::class, 'activeForInstance']);
+    Route::delete('/{id}', [ScheduleController::class, 'cancel']);
+});
 
 Route::get('/tariff-plans', [TariffPlanController::class, 'index']);
 Route::post('/price', [TariffPlanController::class, 'price']);
