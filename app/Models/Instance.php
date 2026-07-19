@@ -44,6 +44,14 @@ class Instance extends Model {
             ->first();
     }
 
+    public static function existsByIdOrMacAddress($idOrMacAddress): bool {
+        if (filter_var($idOrMacAddress, FILTER_VALIDATE_MAC)) {
+            return static::query()->where('mac_address', $idOrMacAddress)->exists();
+        }
+
+        return static::query()->where('id', $idOrMacAddress)->exists();
+    }
+
     public static function findByIdOrMacAddressOrFail($idOrMacAddress): Model|Builder {
         if (filter_var($idOrMacAddress, FILTER_VALIDATE_MAC)) {
             return static::query()
