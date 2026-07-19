@@ -21,9 +21,12 @@ Route::get('/posts', [PostController::class, 'index']);
 
 Route::middleware('private')->prefix('/schedule')->group(function () {
     Route::post('/', [ScheduleController::class, 'store']);
-    Route::get('/{idOrMacAddress}', [ScheduleController::class, 'activeForInstance']);
+    Route::get('/{id}', [ScheduleController::class, 'activeForInstance'])->whereNumber('id');
     Route::delete('/{id}', [ScheduleController::class, 'cancel']);
 });
+
+Route::middleware(['overlay', 'throttle:30,1'])
+    ->get('/schedule/{macAddress}', [ScheduleController::class, 'activeForInstanceByMac']);
 
 Route::get('/tariff-plans', [TariffPlanController::class, 'index']);
 Route::post('/price', [TariffPlanController::class, 'price']);

@@ -23,8 +23,14 @@ class ScheduleService {
         return $schedule;
     }
 
-    public function activeForInstance(string $idOrMacAddress): ?Schedule {
-        $instance = Instance::findByIdOrMacAddressOrFail($idOrMacAddress);
+    public function activeForInstanceById(int $id): ?Schedule {
+        $instance = Instance::findOrFail($id);
+
+        return $instance->getActiveSchedule();
+    }
+
+    public function activeForInstanceByMac(string $macAddress): ?Schedule {
+        $instance = Instance::where('mac_address', $macAddress)->firstOrFail();
 
         return $instance->getActiveSchedule();
     }

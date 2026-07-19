@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Schedule\StoreRequest;
 use App\Http\Resources\ScheduleResource;
+use App\Models\Schedule;
 use App\Services\ScheduleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
@@ -22,9 +23,15 @@ class ScheduleController extends BaseController {
         return Response::json($schedule);
     }
 
-    public function activeForInstance(string $idOrMacAddress): JsonResponse {
-        $schedule = $this->service->activeForInstance($idOrMacAddress);
+    public function activeForInstance(int $id): JsonResponse {
+        return $this->scheduleResponse($this->service->activeForInstanceById($id));
+    }
 
+    public function activeForInstanceByMac(string $macAddress): JsonResponse {
+        return $this->scheduleResponse($this->service->activeForInstanceByMac($macAddress));
+    }
+
+    private function scheduleResponse(?Schedule $schedule): JsonResponse {
         $resource = ScheduleResource::make($schedule);
 
         if ($schedule?->session_id) {
