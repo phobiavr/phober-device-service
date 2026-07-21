@@ -8,8 +8,10 @@ use App\Models\Schedule;
 use App\Services\ScheduleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Phobiavr\PhoberLaravelCommon\Clients\StaffClient;
+use Phobiavr\PhoberLaravelCommon\Exceptions\ServiceUnavailableException;
 use Symfony\Component\HttpFoundation\Response as ResponseFoundation;
 
 class ScheduleController extends BaseController {
@@ -35,11 +37,18 @@ class ScheduleController extends BaseController {
         $resource = ScheduleResource::make($schedule);
 
         if ($schedule?->session_id) {
-            $response = StaffClient::sessionById($schedule->session_id);
-            if ($response->ok()) {
-                $data = json_decode($response->body());
-                $resource->servicedByName = $data->serviced_by_name ?? null;
-                $resource->customer = $data->customer ?? null;
+            try {
+                $response = StaffClient::sessionById($schedule->session_id);
+                if ($response->ok()) {
+                    $data = json_decode($response->body());
+                    $resource->servicedByName = $data->serviced_by_name ?? null;
+                    $resource->customer = $data->customer ?? null;
+                }
+            } catch (ServiceUnavailableException $e) {
+                Log::error('Failed to enrich schedule: staff-service unreachable', [
+                    'session_id' => $schedule->session_id,
+                    'message'    => $e->getMessage(),
+                ]);
             }
         }
 

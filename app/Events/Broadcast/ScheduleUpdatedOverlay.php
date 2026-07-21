@@ -10,7 +10,9 @@ use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Phobiavr\PhoberLaravelCommon\Clients\StaffClient;
+use Phobiavr\PhoberLaravelCommon\Exceptions\ServiceUnavailableException;
 
 class ScheduleUpdatedOverlay implements ShouldBroadcast {
     use Dispatchable;
@@ -42,11 +44,18 @@ class ScheduleUpdatedOverlay implements ShouldBroadcast {
 
         if ($this->schedule?->session_id) {
             //TODO:: refactor
-            $response = StaffClient::sessionById($this->schedule->session_id);
-            if ($response->ok()) {
-                $data = json_decode($response->body());
-                $resource->servicedByName = $data->serviced_by_name ?? null;
-                $resource->customer = $data->customer ?? null;
+            try {
+                $response = StaffClient::sessionById($this->schedule->session_id);
+                if ($response->ok()) {
+                    $data = json_decode($response->body());
+                    $resource->servicedByName = $data->serviced_by_name ?? null;
+                    $resource->customer = $data->customer ?? null;
+                }
+            } catch (ServiceUnavailableException $e) {
+                Log::error('Failed to enrich overlay broadcast: staff-service unreachable', [
+                    'session_id' => $this->schedule->session_id,
+                    'message'    => $e->getMessage(),
+                ]);
             }
         }
 
