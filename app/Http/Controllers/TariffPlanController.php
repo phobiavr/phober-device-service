@@ -8,6 +8,7 @@ use App\Services\TariffPlanService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Response;
+use Symfony\Component\HttpFoundation\Response as ResponseFoundation;
 
 class TariffPlanController extends BaseController {
     public function __construct(private readonly TariffPlanService $service) {
@@ -19,6 +20,10 @@ class TariffPlanController extends BaseController {
 
     public function price(ShowRequest $request): JsonResponse {
         $plan = $this->service->find($request->payload());
+
+        if (!$plan) {
+            return Response::json(['message' => 'Tariff plan not found.'], ResponseFoundation::HTTP_NOT_FOUND);
+        }
 
         return Response::json(TariffPlanResource::make($plan));
     }
