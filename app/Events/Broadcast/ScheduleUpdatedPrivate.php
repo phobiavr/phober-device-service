@@ -31,8 +31,7 @@ class ScheduleUpdatedPrivate implements ShouldBroadcast {
         $countdown = 0;
 
         /** @var Instance $instance */
-        $instance = Instance::find($this->schedule->instanceId);
-        //TODO:: what?!
+        $instance = Instance::find($this->schedule->instance_id);
         $schedule = $instance?->getActiveSchedule();
 
         if ($schedule) {
