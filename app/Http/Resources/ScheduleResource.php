@@ -24,6 +24,7 @@ class ScheduleResource extends JsonResource {
             'serviced_by_name' => $this->servicedByName,
             'customer'         => $this->customer,
             'start'            => $this->resource?->start,
+            'end'              => $this->resource?->end,
         ];
     }
 }

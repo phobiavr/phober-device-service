@@ -56,6 +56,7 @@ class ScheduleUpdatedPrivate implements ShouldBroadcast {
             'countdown' => (int) $countdown,
             'upcoming_type' => $upcomingType,
             'starts_in' => $startsIn,
+            'sent_by' => 'device-service'
         ];
     }
 }

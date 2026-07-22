@@ -59,6 +59,6 @@ class ScheduleUpdatedOverlay implements ShouldBroadcast {
             }
         }
 
-        return $resource->resolve();
+        return $resource->resolve() + ['sent_by' => 'device-service'];
     }
 }

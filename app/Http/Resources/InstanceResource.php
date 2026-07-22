@@ -20,7 +20,9 @@ class InstanceResource extends JsonResource {
             'id'               => $this->id,
             'label'            => $this->label,
             'device'           => $this->device,
+            'mac_address'      => $this->mac_address,
             'active'           => $this->active,
+            'created_at'       => $this->created_at,
             'session'          => $this->session,
             'schedule'         => ScheduleResource::make($this->getActiveSchedule()),
             'upcoming_schedule' => $upcoming ? [

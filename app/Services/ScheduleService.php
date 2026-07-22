@@ -2,11 +2,27 @@
 
 namespace App\Services;
 
+use App\Events\ScheduleUpdated;
 use App\Models\Instance;
 use App\Models\Schedule;
+use Phobiavr\PhoberLaravelCommon\Data\SchedulePayload;
 use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 
 class ScheduleService {
+    public function create(SchedulePayload $payload): Schedule {
+        $schedule = new Schedule([
+            'instance_id' => $payload->instanceId,
+            'type'        => $payload->type,
+            'start'       => $payload->start,
+            'end'         => $payload->end,
+        ]);
+        $schedule->save();
+
+        ScheduleUpdated::dispatch($schedule, 'created');
+
+        return $schedule;
+    }
+
     public function save(ScheduleEnum $type, int $instanceId, ?int $minutes = null, ?Schedule $schedule = null, ?int $sessionId = null, ?string $startedAt = null): Schedule {
         $schedule ??= new Schedule(['instance_id' => $instanceId]);
 
