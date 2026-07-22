@@ -28,7 +28,7 @@ class Schedule extends Model {
     ];
 
     public function instance(): BelongsTo {
-        return $this->belongsTo(DeviceInstance::class);
+        return $this->belongsTo(Instance::class);
     }
 
     public function isActive(): bool {
