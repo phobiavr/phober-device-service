@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,8 @@ class OverlaySecretMiddleware {
      * @param Request $request
      * @param Closure(Request): (Response|RedirectResponse) $next
      * @return Response|RedirectResponse|JsonResponse
+     *
+     * @throws AuthenticationException
      */
     public function handle(Request $request, \Closure $next) {
         $secret = (string) config('service.overlay_secret');
@@ -22,6 +25,6 @@ class OverlaySecretMiddleware {
             return $next($request);
         }
 
-        return response()->json(['message' => 'Not Found'], JsonResponse::HTTP_NOT_FOUND);
+        throw new AuthenticationException();
     }
 }
