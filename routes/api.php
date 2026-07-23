@@ -4,15 +4,11 @@ use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\InstanceController;
-use App\Http\Controllers\MeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\TariffPlanController;
 use App\Http\Middleware\OverlaySecretMiddleware;
 use Illuminate\Support\Facades\Route;
-
-
-Route::middleware('auth.server')->get('', [MeController::class, 'show']);
 
 Route::get('/games', [GameController::class, 'index']);
 Route::post('/games/search', [GameController::class, 'search']);
