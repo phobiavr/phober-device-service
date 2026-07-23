@@ -17,7 +17,7 @@ Route::get('/games/{id}', [GameController::class, 'show']);
 Route::get('/posts', [PostController::class, 'index']);
 
 Route::middleware('private')->prefix('/schedule')->group(function () {
-    Route::post('/', [ScheduleController::class, 'store']);
+    Route::post('/', [ScheduleController::class, 'store'])->middleware('idempotent');
     Route::get('/{id}', [ScheduleController::class, 'activeForInstance'])->whereNumber('id');
     Route::delete('/{id}', [ScheduleController::class, 'cancel']);
 });
