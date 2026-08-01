@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
@@ -17,6 +18,7 @@ use Phobiavr\PhoberLaravelCommon\Traits\Authorable;
  */
 class Schedule extends Model {
     use Authorable;
+    use HasFactory;
 
     protected $fillable = [
         'type', 'instance_id', 'start', 'end', 'session_id',

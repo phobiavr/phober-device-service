@@ -16,7 +16,7 @@ class PostResource extends JsonResource {
     public function toArray($request) {
         return [
             "title" => $this->title,
-            "post"  => $this->post['data'],
+            "post"  => $this->post[app()->getLocale()] ?? $this->post['en'] ?? null,
         ];
     }
 }

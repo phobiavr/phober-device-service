@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Phobiavr\PhoberLaravelCommon\Pageable\Pageable;
@@ -21,7 +22,7 @@ use Spatie\Translatable\HasTranslations;
  * @property string preview
  */
 class Game extends Model implements HasMedia {
-    use InteractsWithMedia, Pageable, HasTranslations;
+    use HasFactory, InteractsWithMedia, Pageable, HasTranslations;
 
     public array $translatable = ['description'];
 

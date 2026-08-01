@@ -4,12 +4,15 @@ namespace App\Models;
 
 use App\Jobs\NotifyUpcomingSchedules;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 
 class Instance extends Model {
+    use HasFactory;
+
     protected $casts = [
         'active'             => 'boolean',
         'deactivation_start' => 'datetime',

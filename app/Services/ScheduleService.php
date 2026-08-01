@@ -12,7 +12,7 @@ class ScheduleService {
     public function create(SchedulePayload $payload): Schedule {
         $schedule = new Schedule([
             'instance_id' => $payload->instanceId,
-            'type'        => $payload->type,
+            'type'        => $payload->type->value,
             'start'       => $payload->start,
             'end'         => $payload->end,
         ]);
@@ -28,7 +28,7 @@ class ScheduleService {
 
         $start = $startedAt ? \Carbon\Carbon::parse($startedAt) : now();
 
-        $schedule->type = $type;
+        $schedule->type = $type->value;
         $schedule->start = $start;
         $schedule->end = $minutes ? $start->copy()->addMinutes($minutes) : null;
         if ($sessionId) {
@@ -54,7 +54,7 @@ class ScheduleService {
     public function cancel(int $id): Schedule {
         $schedule = Schedule::where('type', '<>', ScheduleEnum::CANCELED->value)->findOrFail($id);
 
-        $schedule->type = ScheduleEnum::CANCELED;
+        $schedule->type = ScheduleEnum::CANCELED->value;
         $schedule->save();
 
         return $schedule;

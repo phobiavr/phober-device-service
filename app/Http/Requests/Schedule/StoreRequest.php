@@ -16,7 +16,7 @@ class StoreRequest extends FormRequest {
             $data = $validator->getData();
 
             $start = $data['start'];
-            $end   = $data['end'];
+            $end   = $data['end'] ?? null;
 
             if (!$instanceId = ($data['instance_id'] ?? false)) {
                 return false;
