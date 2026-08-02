@@ -87,6 +87,70 @@ class SessionScheduleHandlerTest extends TestCase
 
         $this->assertSame(1, Schedule::where('instance_id', $instance->id)->count());
         $this->assertSame(ScheduleEnum::CANCELED->value, $inSession->fresh()->type);
+
+        Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'cancelled');
+    }
+
+    public function test_cancels_a_non_queue_active_schedule_for_the_cancel_action_without_creating_a_replacement(): void
+    {
+        Event::fake();
+        $instance = Instance::factory()->create();
+        $inSession = Schedule::factory()->for($instance)->create();
+
+        app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::CANCEL, null, null, null);
+
+        $this->assertSame(1, Schedule::where('instance_id', $instance->id)->count());
+        $this->assertSame(ScheduleEnum::CANCELED->value, $inSession->fresh()->type);
+
+        Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'cancelled');
+    }
+
+    public function test_cancels_a_non_queue_active_schedule_and_creates_a_fresh_in_session_schedule_when_restarted(): void
+    {
+        // A non-QUEUE active schedule is not special-cased at all — it always
+        // falls through to the generic cancel-then-recreate path, even for START.
+        Event::fake();
+        $instance = Instance::factory()->create();
+        $inSession = Schedule::factory()->for($instance)->create();
+
+        app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::START, 20, 77, null);
+
+        $this->assertSame(ScheduleEnum::CANCELED->value, $inSession->fresh()->type);
+
+        $fresh = Schedule::where('instance_id', $instance->id)->where('type', ScheduleEnum::IN_SESSION->value)->sole();
+        $this->assertSame(77, $fresh->session_id);
+        $this->assertSame(20.0, $fresh->start->diffInMinutes($fresh->end));
+
+        Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'cancelled');
+        Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'created');
+    }
+
+    public function test_cancels_a_queued_schedule_without_creating_a_replacement_when_finished(): void
+    {
+        // Only START/CANCEL are special-cased inside the active-QUEUE branch;
+        // FINISH falls through to the generic cancel path with no new schedule.
+        Event::fake();
+        $instance = Instance::factory()->create();
+        $queued = Schedule::factory()->for($instance)->queue()->create();
+
+        app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::FINISH, null, null, null);
+
+        $this->assertSame(1, Schedule::where('instance_id', $instance->id)->count());
+        $this->assertSame(ScheduleEnum::CANCELED->value, $queued->fresh()->type);
+
+        Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'cancelled');
+    }
+
+    public function test_dispatches_nothing_when_there_is_no_active_schedule_and_the_action_is_cancel_or_finish(): void
+    {
+        Event::fake();
+        $instance = Instance::factory()->create();
+
+        app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::CANCEL, null, null, null);
+        app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::FINISH, null, null, null);
+
+        $this->assertSame(0, Schedule::where('instance_id', $instance->id)->count());
+        Event::assertNotDispatched(ScheduleUpdated::class);
     }
 
     public function test_cancels_a_queued_schedule_and_creates_a_fresh_queue_schedule_when_re_queued(): void
