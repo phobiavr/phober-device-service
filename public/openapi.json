@@ -1,0 +1,406 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Phober Device Service API",
+    "description": "VR device instances, schedules, games, tariffs, and the VR-device overlay feed. Reached externally via https://api.phober.test/hardware/*.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "https://api.phober.test/hardware", "description": "Via API gateway" }
+  ],
+  "tags": [
+    { "name": "Schedule" },
+    { "name": "Tariffs" },
+    { "name": "Instances" },
+    { "name": "Games" },
+    { "name": "Devices" },
+    { "name": "Posts" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "privateService": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Service-Secret",
+        "description": "Shared inter-service secret (private middleware) — for service-to-service calls (e.g. staff-service creating/canceling a schedule), not external clients."
+      },
+      "overlaySecret": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Overlay-Secret",
+        "description": "Per-deployment secret shared with the external VR device overlay client (OverlaySecretMiddleware). The same secret is also part of the WebSocket channel name the overlay subscribes to."
+      }
+    },
+    "schemas": {
+      "Schedule": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["MAINTENANCE", "RESERVATION", "INSPECTION", "REPAIR", "IN_USE", "IN_SESSION", "QUEUE", "ON_EVENT", "CANCELED", "N/A"], "description": "\"N/A\" when there is no schedule" },
+          "countdown": { "type": "integer", "description": "Seconds until end; -1 if open-ended (no end); 0 if there is no schedule" },
+          "serviced_by_name": { "type": "string", "nullable": true, "description": "Enriched from staff-service when the schedule has a session_id" },
+          "customer": { "type": "string", "nullable": true },
+          "start": { "type": "string", "format": "date-time", "nullable": true },
+          "end": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "Instance": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "label": { "type": "string", "description": "\"{device} - {position}\", position = ordinal among same-device instances" },
+          "device": { "type": "string", "description": "DeviceEnum value" },
+          "mac_address": { "type": "string" },
+          "active": { "type": "boolean" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "session": { "type": "string", "nullable": true },
+          "schedule": { "$ref": "#/components/schemas/Schedule" },
+          "upcoming_schedule": {
+            "type": "object",
+            "nullable": true,
+            "description": "A schedule starting within the next 15 minutes, if any",
+            "properties": {
+              "type": { "type": "string" },
+              "starts_in": { "type": "integer", "description": "Seconds until it starts" }
+            }
+          }
+        }
+      },
+      "Game": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "slug": { "type": "string" },
+          "video": { "type": "string", "nullable": true, "description": "YouTube watch URL, or null" },
+          "device": { "type": "array", "items": { "$ref": "#/components/schemas/SimpleDevice" } },
+          "description": { "type": "string", "description": "Translated to the request locale" },
+          "rating": { "type": "number", "format": "float" },
+          "multiplayer": { "type": "boolean" },
+          "preview": { "type": "string", "nullable": true, "description": "URL of the first \"preview\" media item" },
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "integer" },
+                "name": { "type": "string" },
+                "slug": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "SimpleDevice": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "type": { "type": "string", "description": "DeviceEnum value" },
+          "slug": { "type": "string" },
+          "logo": { "type": "string", "nullable": true, "description": "URL of the \"logo\" media collection's first item" }
+        }
+      },
+      "Post": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "post": { "type": "string", "description": "Body, resolved to the current locale (falls back to en)" }
+        }
+      },
+      "TariffPlan": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "device": { "type": "string", "description": "DeviceEnum value" },
+          "tariff": { "type": "string", "enum": ["MORNING", "EVENING", "EXTRA"] },
+          "time": { "type": "string", "enum": ["MIN_15", "MIN_30", "MIN_60"] },
+          "price": { "type": "number", "format": "float" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/schedule": {
+      "post": {
+        "tags": ["Schedule"],
+        "summary": "Create a schedule entry for an instance",
+        "description": "Validates the instance is active and the [start,end] window doesn't overlap an existing non-canceled schedule on it. Broadcasts ScheduleUpdated('created').",
+        "security": [{ "privateService": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["type", "instance_id", "start"],
+                "properties": {
+                  "type": { "type": "string", "enum": ["MAINTENANCE", "RESERVATION", "INSPECTION", "REPAIR", "IN_USE", "IN_SESSION", "QUEUE", "ON_EVENT", "CANCELED"] },
+                  "instance_id": { "type": "integer" },
+                  "start": { "type": "string", "example": "2026-08-02 18:00:00", "description": "Format: Y-m-d H:i:s" },
+                  "end": { "type": "string", "format": "date-time", "nullable": true, "description": "Must be after start; omit for an open-ended schedule" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Schedule" } } } },
+          "422": { "description": "Instance inactive, or the window conflicts with an existing schedule" }
+        }
+      }
+    },
+    "/schedule/{id}": {
+      "get": {
+        "tags": ["Schedule"],
+        "summary": "Get the active schedule for an instance, by numeric id",
+        "security": [{ "privateService": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "OK (schedule fields are all null/N-A if the instance has no active schedule)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Schedule" } } } },
+          "404": { "description": "Instance not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Schedule"],
+        "summary": "Cancel a schedule entry",
+        "description": "Marks the schedule CANCELED. Unlike the internal session-sync handler, this endpoint does not itself broadcast ScheduleUpdated.",
+        "security": [{ "privateService": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "204": { "description": "Canceled" },
+          "404": { "description": "Not found or already canceled" }
+        }
+      }
+    },
+    "/schedule/{macAddress}": {
+      "get": {
+        "tags": ["Schedule"],
+        "summary": "Get the active schedule for an instance, by MAC address (overlay feed)",
+        "description": "Used by the external VR device overlay client to poll/bootstrap its display. Throttled 30 requests/minute.",
+        "security": [{ "overlaySecret": [] }],
+        "parameters": [
+          { "name": "macAddress", "in": "path", "required": true, "schema": { "type": "string" }, "example": "AA:BB:CC:DD:EE:FF" }
+        ],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Schedule" } } } },
+          "401": { "description": "Missing/invalid X-Overlay-Secret header" },
+          "404": { "description": "No instance with that MAC address" },
+          "429": { "description": "Throttled — more than 30 requests in a minute" }
+        }
+      }
+    },
+    "/tariff-plans": {
+      "get": {
+        "tags": ["Tariffs"],
+        "summary": "List all tariff plans",
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/TariffPlan" } } } } }
+        }
+      }
+    },
+    "/price": {
+      "post": {
+        "tags": ["Tariffs"],
+        "summary": "Resolve the price for a tariff/time combination on an instance or device type",
+        "description": "Called by staff-service (DeviceClient::price) on every session creation — the single most inter-service-critical endpoint in this service.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["tariff", "time"],
+                "properties": {
+                  "instance_id": { "type": "integer", "nullable": true, "description": "Required if device is omitted" },
+                  "device": { "type": "string", "enum": ["HTC", "OCULUS", "PS_VR", "OMNI", "DOF_3"], "nullable": true, "description": "Required if instance_id is omitted" },
+                  "tariff": { "type": "string", "enum": ["MORNING", "EVENING", "EXTRA"] },
+                  "time": { "type": "string", "enum": ["MIN_15", "MIN_30", "MIN_60"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Matching plan found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TariffPlan" } } } },
+          "404": { "description": "No matching tariff plan", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string", "example": "Tariff plan not found." } } } } } }
+        }
+      }
+    },
+    "/instances": {
+      "get": {
+        "tags": ["Instances"],
+        "summary": "List VR device instances",
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Instance" } } } } }
+        }
+      }
+    },
+    "/instance/{idOrMacAddress}": {
+      "get": {
+        "tags": ["Instances"],
+        "summary": "Get a single instance, by id or MAC address",
+        "parameters": [
+          { "name": "idOrMacAddress", "in": "path", "required": true, "schema": { "type": "string" }, "example": "AA:BB:CC:DD:EE:FF" }
+        ],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Instance" } } } },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/games": {
+      "get": {
+        "tags": ["Games"],
+        "summary": "List games (paginated)",
+        "parameters": [
+          { "name": "page", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "size", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "columns", "in": "query", "required": false, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "type": "array", "items": { "$ref": "#/components/schemas/Game" } },
+                    "total": { "type": "integer" },
+                    "size": { "type": "integer" },
+                    "current_page": { "type": "integer" },
+                    "total_pages": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/search": {
+      "post": {
+        "tags": ["Games"],
+        "summary": "Search games by device/genre/multiplayer/rating (paginated)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "device": { "type": "string", "nullable": true },
+                  "genre": { "type": "string", "nullable": true },
+                  "multiplayer": { "type": "boolean", "nullable": true },
+                  "rating": { "type": "number", "nullable": true },
+                  "page": { "type": "integer", "nullable": true },
+                  "size": { "type": "integer", "nullable": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK, same paginated envelope as GET /games",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "type": "array", "items": { "$ref": "#/components/schemas/Game" } },
+                    "total": { "type": "integer" },
+                    "size": { "type": "integer" },
+                    "current_page": { "type": "integer" },
+                    "total_pages": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/{id}": {
+      "get": {
+        "tags": ["Games"],
+        "summary": "Get a single game",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Game" } } } },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/genres": {
+      "get": {
+        "tags": ["Games"],
+        "summary": "List game genres",
+        "description": "Raw model collection, no Resource wrapper.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "name": { "type": "string" },
+                      "slug": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/devices": {
+      "get": {
+        "tags": ["Devices"],
+        "summary": "List device types (VR headset models)",
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/SimpleDevice" } } } } }
+        }
+      }
+    },
+    "/posts": {
+      "get": {
+        "tags": ["Posts"],
+        "summary": "List blog/news posts (paginated)",
+        "parameters": [
+          { "name": "page", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "size", "in": "query", "required": false, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "type": "array", "items": { "$ref": "#/components/schemas/Post" } },
+                    "total": { "type": "integer" },
+                    "size": { "type": "integer" },
+                    "current_page": { "type": "integer" },
+                    "total_pages": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
