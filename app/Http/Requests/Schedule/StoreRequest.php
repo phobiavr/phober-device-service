@@ -11,6 +11,7 @@ use Phobiavr\PhoberLaravelCommon\Data\SchedulePayload;
 use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 
 class StoreRequest extends FormRequest {
+    /** @return array<string, array<int, mixed>> */
     public function rules(): array {
         ValidatorFacade::extend('free', function ($attribute, $value, $parameters, Validator $validator) {
             $data = $validator->getData();

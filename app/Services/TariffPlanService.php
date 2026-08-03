@@ -8,12 +8,15 @@ use Illuminate\Database\Eloquent\Collection;
 use Phobiavr\PhoberLaravelCommon\Data\PricePayload;
 
 class TariffPlanService {
+    /** @return Collection<int, TariffPlan> */
     public function all(): Collection {
         return TariffPlan::all();
     }
 
     public function find(PricePayload $payload): ?TariffPlan {
-        $device = $payload->device?->value ?? Instance::findOrFail($payload->instanceId)->device;
+        $device = $payload->device !== null
+            ? $payload->device->value
+            : Instance::findOrFail($payload->instanceId)->device;
 
         return TariffPlan::query()
             ->where('device', $device)

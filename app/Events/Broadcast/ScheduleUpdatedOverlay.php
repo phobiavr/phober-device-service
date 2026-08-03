@@ -39,10 +39,11 @@ class ScheduleUpdatedOverlay implements ShouldBroadcast {
         return 'ScheduleUpdated';
     }
 
+    /** @return array<string, mixed> */
     public function broadcastWith(): array {
         $resource = ScheduleResource::make($this->schedule);
 
-        if ($this->schedule?->session_id) {
+        if ($this->schedule->session_id) {
             //TODO:: refactor
             try {
                 $response = StaffClient::sessionById($this->schedule->session_id);

@@ -10,6 +10,12 @@ parameters:
         - routes
         - shared/laravel-common/src
 
+    excludePaths:
+        # References Spatie\MediaLibraryPro\Models\TemporaryUpload, which only
+        # exists in the paid Media Library Pro add-on — not installed here,
+        # and the key isn't used anywhere in this codebase.
+        - config/media-library.php
+
     tmpDir: build/phpstan
 
     treatPhpDocTypesAsCertain: false

@@ -7,16 +7,15 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin Device */
 class SimpleDeviceResource extends JsonResource {
     /**
      * Transform the resource into an array.
      *
      * @param Request $request
-     * @return array|Arrayable|\JsonSerializable
+     * @return array<string, mixed>|Arrayable<array-key, mixed>|\JsonSerializable
      */
     public function toArray($request) {
-        /** @var Device $this */
-
         return [
             "id"   => $this->id,
             "name" => $this->name,

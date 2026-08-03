@@ -27,6 +27,7 @@ class ScheduleUpdatedPublic implements ShouldBroadcast
         return 'ScheduleUpdated';
     }
 
+    /** @return array<never, never> */
     public function broadcastWith(): array
     {
         return [];

@@ -5,6 +5,7 @@ namespace App\Http\Requests\Game;
 use Phobiavr\PhoberLaravelCommon\Pageable\PageableRequest;
 
 class SearchRequest extends PageableRequest {
+    /** @return array<string, string> */
     public function rules(): array {
         return [
             'device'      => 'nullable|string',
@@ -14,6 +15,7 @@ class SearchRequest extends PageableRequest {
         ];
     }
 
+    /** @return array<string, mixed> */
     public function filters(): array {
         return [
             'device'      => $this->input('device'),

@@ -2,13 +2,16 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Schedule;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin Schedule */
 class ScheduleResource extends JsonResource {
     public ?string $servicedByName = null;
     public ?string $customer = null;
 
+    /** @return array<string, mixed>|Arrayable<array-key, mixed>|\JsonSerializable */
     public function toArray($request) {
         $type = 'N/A';
         $countdown = 0;

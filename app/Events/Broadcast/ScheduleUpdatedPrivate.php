@@ -26,6 +26,7 @@ class ScheduleUpdatedPrivate implements ShouldBroadcast {
         return 'ScheduleUpdated';
     }
 
+    /** @return array<string, mixed> */
     public function broadcastWith(): array {
         $type = 'N/A';
         $countdown = 0;

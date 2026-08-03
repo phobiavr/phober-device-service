@@ -2,16 +2,18 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Instance;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin Instance */
 class InstanceResource extends JsonResource {
     /**
      * Transform the resource into an array.
      *
      * @param Request $request
-     * @return array|Arrayable|\JsonSerializable
+     * @return array<string, mixed>|Arrayable<array-key, mixed>|\JsonSerializable
      */
     public function toArray($request) {
         $upcoming = $this->resource->getUpcomingSchedule();

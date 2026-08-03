@@ -3,14 +3,26 @@
 namespace App\Models;
 
 use App\Jobs\NotifyUpcomingSchedules;
-use Illuminate\Database\Eloquent\Builder;
+use Database\Factories\InstanceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 
+/**
+ * @property int $id
+ * @property string|null $mac_address
+ * @property string $device
+ * @property bool $active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read string $label
+ * @property \Illuminate\Database\Eloquent\Collection<int, Schedule> $schedules
+ * @property mixed $session
+ */
 class Instance extends Model {
+    /** @use HasFactory<InstanceFactory> */
     use HasFactory;
 
     protected $casts = [
@@ -21,10 +33,12 @@ class Instance extends Model {
 
     protected $with = ['schedules'];
 
+    /** @return HasMany<Schedule, $this> */
     public function schedules(): HasMany {
         return $this->hasMany(Schedule::class, 'instance_id');
     }
 
+    /** @return BelongsTo<Device, $this> */
     public function device(): BelongsTo {
         return $this->belongsTo(Device::class);
     }
@@ -47,7 +61,7 @@ class Instance extends Model {
             ->first();
     }
 
-    public static function findByIdOrMacAddressOrFail($idOrMacAddress): Model|Builder {
+    public static function findByIdOrMacAddressOrFail(string $idOrMacAddress): static {
         if (filter_var($idOrMacAddress, FILTER_VALIDATE_MAC)) {
             return static::query()
                 ->where('mac_address', $idOrMacAddress)

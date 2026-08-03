@@ -3,14 +3,19 @@
 namespace App\Services;
 
 use App\Models\Game;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Phobiavr\PhoberLaravelCommon\Pageable\PageableRequest;
 
 class GameService {
+    /** @return LengthAwarePaginator<int, Game> */
     public function paginate(PageableRequest $request): LengthAwarePaginator {
         return Game::paginateFromRequest($request);
     }
 
+    /**
+     * @param array<string, mixed> $filters
+     * @return LengthAwarePaginator<int, Game>
+     */
     public function search(PageableRequest $request, array $filters): LengthAwarePaginator {
         $query = Game::query();
 

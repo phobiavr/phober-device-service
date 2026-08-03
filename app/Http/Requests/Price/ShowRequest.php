@@ -10,6 +10,7 @@ use Phobiavr\PhoberLaravelCommon\Enums\SessionTariffEnum;
 use Phobiavr\PhoberLaravelCommon\Enums\SessionTimeEnum;
 
 class ShowRequest extends FormRequest {
+    /** @return array<string, array<int, mixed>> */
     public function rules(): array {
         return [
             'instance_id' => ['required_without:device', 'exists:instances,id'],
