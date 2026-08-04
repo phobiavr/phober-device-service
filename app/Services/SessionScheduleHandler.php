@@ -9,10 +9,11 @@ use Illuminate\Support\Facades\DB;
 use Phobiavr\PhoberLaravelCommon\Contracts\SessionScheduleHandlerInterface;
 use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 use Phobiavr\PhoberLaravelCommon\Enums\SessionScheduleActionEnum;
+use Phobiavr\PhoberLaravelCommon\Exceptions\ScheduleConflictException;
 
-class SessionScheduleHandler implements SessionScheduleHandlerInterface
+readonly class SessionScheduleHandler implements SessionScheduleHandlerInterface
 {
-    public function __construct(private readonly ScheduleService $scheduleService) {}
+    public function __construct(private ScheduleService $scheduleService) {}
 
     public function handle(int $instanceId, SessionScheduleActionEnum $action, ?int $time, ?int $sessionId, ?string $startedAt = null): void
     {
@@ -44,6 +45,10 @@ class SessionScheduleHandler implements SessionScheduleHandlerInterface
             }
 
             if ($active) {
+                if ($active->type !== ScheduleEnum::QUEUE->value) {
+                    throw new ScheduleConflictException('Instance already has an active schedule that is not queued.');
+                }
+
                 $cancelled = $this->scheduleService->cancel($active->id);
                 ScheduleUpdated::dispatch($cancelled, 'cancelled');
             }
