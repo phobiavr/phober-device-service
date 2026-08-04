@@ -10,6 +10,7 @@ use Phobiavr\PhoberLaravelCommon\Contracts\SessionScheduleHandlerInterface;
 use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 use Phobiavr\PhoberLaravelCommon\Enums\SessionScheduleActionEnum;
 use Phobiavr\PhoberLaravelCommon\Exceptions\ScheduleConflictException;
+use Phobiavr\PhoberLaravelCommon\Jobs\CancelSession;
 
 readonly class SessionScheduleHandler implements SessionScheduleHandlerInterface
 {
@@ -46,6 +47,10 @@ readonly class SessionScheduleHandler implements SessionScheduleHandlerInterface
 
             if ($active) {
                 if ($active->type !== ScheduleEnum::QUEUE->value) {
+                    if ($sessionId !== null) {
+                        CancelSession::dispatch($sessionId)->onQueue('staff');
+                    }
+
                     throw new ScheduleConflictException('Instance already has an active schedule that is not queued.');
                 }
 
