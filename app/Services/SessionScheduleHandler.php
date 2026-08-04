@@ -50,8 +50,8 @@ readonly class SessionScheduleHandler implements SessionScheduleHandlerInterface
             };
 
             $searchTypes = match ($action) {
-                SessionScheduleActionEnum::START => [ScheduleEnum::QUEUE->value],
-                SessionScheduleActionEnum::CANCEL, SessionScheduleActionEnum::FINISH => [ScheduleEnum::QUEUE->value, ScheduleEnum::IN_SESSION->value],
+                SessionScheduleActionEnum::START => [ScheduleEnum::QUEUE->value, ScheduleEnum::IN_SESSION->value],
+                SessionScheduleActionEnum::CANCEL, SessionScheduleActionEnum::FINISH => [ScheduleEnum::QUEUE->value, ScheduleEnum::IN_SESSION->value, ScheduleEnum::CANCELED->value],
             };
 
             /** @var Schedule|null $queued */
@@ -60,6 +60,10 @@ readonly class SessionScheduleHandler implements SessionScheduleHandlerInterface
                 ->whereIn('type', $searchTypes)
                 ->lockForUpdate()
                 ->first();
+
+            if ($queued?->type === $type->value) {
+                throw new ScheduleConflictException('Schedule is already in the requested state.');
+            }
 
             $schedule = $this->scheduleService->save($type, $instanceId, $time, $queued, sessionId: $sessionId, startedAt: $startedAt);
             ScheduleUpdated::dispatch($schedule, $queued ? 'updated' : 'created');
