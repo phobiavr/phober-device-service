@@ -22,49 +22,47 @@ readonly class SessionScheduleHandler implements SessionScheduleHandlerInterface
             $instance = Instance::query()->whereKey($instanceId)->lockForUpdate()->first();
             if (!$instance) return;
 
-            /** @var Schedule|null $active */
-            $active = Schedule::query()
-                ->where('instance_id', $instanceId)
-                ->lockForUpdate()
-                ->get()
-                ->filter(fn(Schedule $schedule) => $schedule->isActive())
-                ->sortBy('end')
-                ->first();
+            if ($action === SessionScheduleActionEnum::QUEUE) {
+                /** @var Schedule|null $active */
+                $active = Schedule::query()
+                    ->where('instance_id', $instanceId)
+                    ->lockForUpdate()
+                    ->get()
+                    ->first(fn(Schedule $schedule) => $schedule->isActive());
 
-            if ($active?->type === ScheduleEnum::QUEUE->value) {
-                if ($action === SessionScheduleActionEnum::START) {
-                    $updated = $this->scheduleService->save(ScheduleEnum::IN_SESSION, $active->instance_id, $time, $active, startedAt: $startedAt);
-                    ScheduleUpdated::dispatch($updated, 'updated');
-                    return;
-                }
-
-                if ($action === SessionScheduleActionEnum::CANCEL) {
-                    $cancelled = $this->scheduleService->cancel($active->id);
-                    ScheduleUpdated::dispatch($cancelled, 'cancelled');
-                    return;
-                }
-            }
-
-            if ($active) {
-                if ($active->type !== ScheduleEnum::QUEUE->value) {
+                if ($active) {
                     if ($sessionId !== null) {
                         CancelSession::dispatch($sessionId)->onQueue('staff');
                     }
 
-                    throw new ScheduleConflictException('Instance already has an active schedule that is not queued.');
+                    throw new ScheduleConflictException('Instance already has an active schedule.');
                 }
 
-                $cancelled = $this->scheduleService->cancel($active->id);
-                ScheduleUpdated::dispatch($cancelled, 'cancelled');
-            }
-
-            if ($action === SessionScheduleActionEnum::QUEUE) {
                 $schedule = $this->scheduleService->save(ScheduleEnum::QUEUE, $instanceId, sessionId: $sessionId, startedAt: $startedAt);
                 ScheduleUpdated::dispatch($schedule, 'created');
-            } elseif ($action === SessionScheduleActionEnum::START) {
-                $schedule = $this->scheduleService->save(ScheduleEnum::IN_SESSION, $instanceId, $time, sessionId: $sessionId, startedAt: $startedAt);
-                ScheduleUpdated::dispatch($schedule, 'created');
+
+                return;
             }
+
+            $type = match ($action) {
+                SessionScheduleActionEnum::START => ScheduleEnum::IN_SESSION,
+                SessionScheduleActionEnum::CANCEL, SessionScheduleActionEnum::FINISH => ScheduleEnum::CANCELED,
+            };
+
+            $searchTypes = match ($action) {
+                SessionScheduleActionEnum::START => [ScheduleEnum::QUEUE->value],
+                SessionScheduleActionEnum::CANCEL, SessionScheduleActionEnum::FINISH => [ScheduleEnum::QUEUE->value, ScheduleEnum::IN_SESSION->value],
+            };
+
+            /** @var Schedule|null $queued */
+            $queued = Schedule::query()
+                ->where('instance_id', $instanceId)
+                ->whereIn('type', $searchTypes)
+                ->lockForUpdate()
+                ->first();
+
+            $schedule = $this->scheduleService->save($type, $instanceId, $time, $queued, sessionId: $sessionId, startedAt: $startedAt);
+            ScheduleUpdated::dispatch($schedule, $queued ? 'updated' : 'created');
         });
     }
 }

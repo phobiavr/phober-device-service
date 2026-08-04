@@ -40,6 +40,46 @@ class SessionScheduleHandlerTest extends TestCase
         Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'created');
     }
 
+    public function test_throws_a_conflict_and_dispatches_a_session_rollback_when_queueing_against_an_existing_queue_schedule(): void
+    {
+        Event::fake();
+        Queue::fake();
+        $instance = Instance::factory()->create();
+        $queued = Schedule::factory()->for($instance)->queue()->create();
+
+        try {
+            app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::QUEUE, null, 88, null);
+            $this->fail('Expected ScheduleConflictException was not thrown.');
+        } catch (ScheduleConflictException) {
+            // expected
+        }
+
+        $this->assertSame(ScheduleEnum::QUEUE->value, $queued->fresh()->type);
+        $this->assertSame(1, Schedule::where('instance_id', $instance->id)->count());
+        Event::assertNotDispatched(ScheduleUpdated::class);
+        Queue::assertPushedOn('staff', CancelSession::class, fn ($job) => $job->sessionId === 88);
+    }
+
+    public function test_throws_a_conflict_and_dispatches_a_session_rollback_when_queueing_against_a_foreign_active_schedule(): void
+    {
+        Event::fake();
+        Queue::fake();
+        $instance = Instance::factory()->create();
+        $inSession = Schedule::factory()->for($instance)->create();
+
+        try {
+            app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::QUEUE, null, 88, null);
+            $this->fail('Expected ScheduleConflictException was not thrown.');
+        } catch (ScheduleConflictException) {
+            // expected
+        }
+
+        $this->assertSame(ScheduleEnum::IN_SESSION->value, $inSession->fresh()->type);
+        $this->assertSame(1, Schedule::where('instance_id', $instance->id)->count());
+        Event::assertNotDispatched(ScheduleUpdated::class);
+        Queue::assertPushedOn('staff', CancelSession::class, fn ($job) => $job->sessionId === 88);
+    }
+
     public function test_creates_a_new_in_session_schedule_with_the_given_duration_when_starting_fresh(): void
     {
         Event::fake();
@@ -50,6 +90,8 @@ class SessionScheduleHandlerTest extends TestCase
         $schedule = Schedule::where('instance_id', $instance->id)->sole();
         $this->assertSame(ScheduleEnum::IN_SESSION->value, $schedule->type);
         $this->assertSame(30.0, $schedule->start->diffInMinutes($schedule->end));
+
+        Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'created');
     }
 
     public function test_promotes_an_existing_queue_schedule_to_in_session_in_place_when_starting(): void
@@ -66,7 +108,22 @@ class SessionScheduleHandlerTest extends TestCase
         Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'updated');
     }
 
-    public function test_cancels_an_existing_queue_schedule_without_creating_a_new_one_when_the_action_is_cancel(): void
+    public function test_creates_a_new_in_session_schedule_when_starting_and_no_queue_schedule_exists_even_if_another_schedule_is_active(): void
+    {
+        // START only looks for an existing QUEUE schedule to promote. A
+        // foreign (non-queue) active schedule doesn't block it anymore.
+        Event::fake();
+        $instance = Instance::factory()->create();
+        $inSession = Schedule::factory()->for($instance)->create();
+
+        app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::START, 20, 77, null);
+
+        $this->assertSame(ScheduleEnum::IN_SESSION->value, $inSession->fresh()->type);
+        $this->assertSame(2, Schedule::where('instance_id', $instance->id)->count());
+        Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'created');
+    }
+
+    public function test_cancels_an_existing_queue_schedule_in_place_when_the_action_is_cancel(): void
     {
         Event::fake();
         $instance = Instance::factory()->create();
@@ -77,91 +134,41 @@ class SessionScheduleHandlerTest extends TestCase
         $this->assertSame(1, Schedule::where('instance_id', $instance->id)->count());
         $this->assertSame(ScheduleEnum::CANCELED->value, $queued->fresh()->type);
 
-        Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'cancelled');
+        Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'updated');
     }
 
-    public function test_throws_a_conflict_and_leaves_the_active_schedule_untouched_when_finishing_against_a_foreign_active_schedule(): void
-    {
-        // A non-QUEUE active schedule now blocks FINISH/CANCEL/QUEUE/START
-        // instead of being silently cancelled — it belongs to someone/something
-        // else (maintenance, another session, ...) and must not be clobbered.
-        Event::fake();
-        Queue::fake();
-        $instance = Instance::factory()->create();
-        $inSession = Schedule::factory()->for($instance)->create();
-
-        try {
-            app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::FINISH, null, null, null);
-            $this->fail('Expected ScheduleConflictException was not thrown.');
-        } catch (ScheduleConflictException) {
-            // expected
-        }
-
-        $this->assertSame(ScheduleEnum::IN_SESSION->value, $inSession->fresh()->type);
-        Event::assertNotDispatched(ScheduleUpdated::class);
-        Queue::assertNotPushed(CancelSession::class);
-    }
-
-    public function test_throws_a_conflict_and_leaves_the_active_schedule_untouched_when_canceling_against_a_foreign_active_schedule(): void
+    public function test_cancels_an_existing_in_session_schedule_in_place_when_the_action_is_cancel(): void
     {
         Event::fake();
         Queue::fake();
         $instance = Instance::factory()->create();
         $inSession = Schedule::factory()->for($instance)->create();
 
-        try {
-            app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::CANCEL, null, null, null);
-            $this->fail('Expected ScheduleConflictException was not thrown.');
-        } catch (ScheduleConflictException) {
-            // expected
-        }
+        app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::CANCEL, null, null, null);
 
-        $this->assertSame(ScheduleEnum::IN_SESSION->value, $inSession->fresh()->type);
-        Event::assertNotDispatched(ScheduleUpdated::class);
-        Queue::assertNotPushed(CancelSession::class);
-    }
-
-    public function test_throws_a_conflict_and_dispatches_a_session_rollback_when_starting_a_new_session_against_a_foreign_active_schedule(): void
-    {
-        Event::fake();
-        Queue::fake();
-        $instance = Instance::factory()->create();
-        $inSession = Schedule::factory()->for($instance)->create();
-
-        try {
-            app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::START, 20, 77, null);
-            $this->fail('Expected ScheduleConflictException was not thrown.');
-        } catch (ScheduleConflictException) {
-            // expected
-        }
-
-        $this->assertSame(ScheduleEnum::IN_SESSION->value, $inSession->fresh()->type);
         $this->assertSame(1, Schedule::where('instance_id', $instance->id)->count());
-        Event::assertNotDispatched(ScheduleUpdated::class);
-        Queue::assertPushedOn('staff', CancelSession::class, fn ($job) => $job->sessionId === 77);
+        $this->assertSame(ScheduleEnum::CANCELED->value, $inSession->fresh()->type);
+        Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'updated');
+        Queue::assertNotPushed(CancelSession::class);
     }
 
-    public function test_throws_a_conflict_and_dispatches_a_session_rollback_when_queueing_against_a_foreign_active_schedule(): void
+    public function test_cancels_an_existing_in_session_schedule_in_place_when_the_action_is_finish(): void
     {
         Event::fake();
         Queue::fake();
         $instance = Instance::factory()->create();
-        Schedule::factory()->for($instance)->create();
+        $inSession = Schedule::factory()->for($instance)->create();
 
-        try {
-            app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::QUEUE, null, 88, null);
-            $this->fail('Expected ScheduleConflictException was not thrown.');
-        } catch (ScheduleConflictException) {
-            // expected
-        }
+        app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::FINISH, null, null, null);
 
-        Queue::assertPushedOn('staff', CancelSession::class, fn ($job) => $job->sessionId === 88);
+        $this->assertSame(1, Schedule::where('instance_id', $instance->id)->count());
+        $this->assertSame(ScheduleEnum::CANCELED->value, $inSession->fresh()->type);
+        Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'updated');
+        Queue::assertNotPushed(CancelSession::class);
     }
 
-    public function test_cancels_a_queued_schedule_without_creating_a_replacement_when_finished(): void
+    public function test_cancels_an_existing_queue_schedule_in_place_when_the_action_is_finish(): void
     {
-        // Only START/CANCEL are special-cased inside the active-QUEUE branch;
-        // FINISH falls through to the generic cancel path with no new schedule.
         Event::fake();
         $instance = Instance::factory()->create();
         $queued = Schedule::factory()->for($instance)->queue()->create();
@@ -171,10 +178,10 @@ class SessionScheduleHandlerTest extends TestCase
         $this->assertSame(1, Schedule::where('instance_id', $instance->id)->count());
         $this->assertSame(ScheduleEnum::CANCELED->value, $queued->fresh()->type);
 
-        Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'cancelled');
+        Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'updated');
     }
 
-    public function test_dispatches_nothing_when_there_is_no_active_schedule_and_the_action_is_cancel_or_finish(): void
+    public function test_creates_a_new_canceled_schedule_when_there_is_no_queue_or_in_session_schedule_and_the_action_is_cancel_or_finish(): void
     {
         Event::fake();
         $instance = Instance::factory()->create();
@@ -182,26 +189,33 @@ class SessionScheduleHandlerTest extends TestCase
         app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::CANCEL, null, null, null);
         app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::FINISH, null, null, null);
 
-        $this->assertSame(0, Schedule::where('instance_id', $instance->id)->count());
-        Event::assertNotDispatched(ScheduleUpdated::class);
+        $this->assertSame(2, Schedule::where('instance_id', $instance->id)->count());
+        $this->assertSame(2, Schedule::where('instance_id', $instance->id)->where('type', ScheduleEnum::CANCELED->value)->count());
+        Event::assertDispatchedTimes(ScheduleUpdated::class, 2);
+        Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'created');
     }
 
-    public function test_cancels_a_queued_schedule_and_creates_a_fresh_queue_schedule_when_re_queued(): void
+    public function test_updates_an_existing_queue_schedule_in_place_when_re_queued_but_currently_the_instance_has_no_other_active_schedule(): void
     {
-        // The QUEUE branch inside the `$active->type === QUEUE` block only
-        // special-cases START/CANCEL — a QUEUE action falls through, so the
-        // existing queued schedule gets cancelled and a brand new one created.
+        // Re-queueing always finds the existing QUEUE schedule as "active"
+        // via isActive(), so this now results in a conflict, not an in-place
+        // update.
         Event::fake();
+        Queue::fake();
         $instance = Instance::factory()->create();
         $queued = Schedule::factory()->for($instance)->queue()->create();
 
-        app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::QUEUE, null, 99, null);
+        try {
+            app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::QUEUE, null, 99, null);
+            $this->fail('Expected ScheduleConflictException was not thrown.');
+        } catch (ScheduleConflictException) {
+            // expected
+        }
 
-        $this->assertSame(ScheduleEnum::CANCELED->value, $queued->fresh()->type);
-
-        $fresh = Schedule::where('instance_id', $instance->id)->where('type', ScheduleEnum::QUEUE->value)->sole();
-        $this->assertSame(99, $fresh->session_id);
-        $this->assertNotSame($queued->id, $fresh->id);
+        $this->assertSame(1, Schedule::where('instance_id', $instance->id)->count());
+        $this->assertSame(ScheduleEnum::QUEUE->value, $queued->fresh()->type);
+        Event::assertNotDispatched(ScheduleUpdated::class);
+        Queue::assertPushedOn('staff', CancelSession::class, fn ($job) => $job->sessionId === 99);
     }
 
     public function test_does_nothing_when_the_instance_does_not_exist(): void
