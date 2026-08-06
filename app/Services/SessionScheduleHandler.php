@@ -33,6 +33,7 @@ readonly class SessionScheduleHandler implements SessionScheduleHandlerInterface
                 /** @var Schedule|null $active */
                 $active = Schedule::query()
                     ->where('instance_id', $instanceId)
+                    ->orderByDesc('id')
                     ->lockForUpdate()
                     ->get()
                     ->first(fn(Schedule $schedule) => $schedule->isActive());
@@ -71,6 +72,7 @@ readonly class SessionScheduleHandler implements SessionScheduleHandlerInterface
             $queued = Schedule::query()
                 ->where('instance_id', $instanceId)
                 ->whereIn('type', $searchTypes)
+                ->orderByDesc('id')
                 ->lockForUpdate()
                 ->first();
 

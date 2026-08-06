@@ -99,6 +99,24 @@ class SessionScheduleHandlerTest extends TestCase
         Queue::assertNotPushed(CancelSession::class);
     }
 
+    public function test_ignores_a_stale_canceled_row_when_checking_for_an_active_schedule_on_queue(): void
+    {
+        // A stale CANCELED row from an earlier round must not be picked up
+        // by isActive() filtering in a way that hides the real active row —
+        // covers the same "multiple rows per instance, no ORDER BY" class of
+        // bug as the FINISH-side test below, but for the QUEUE branch's
+        // separate lookup.
+        Event::fake();
+        Queue::fake();
+        $instance = Instance::factory()->create();
+        Schedule::factory()->for($instance)->canceled()->create(['session_id' => null]); // stale, lower id
+        Schedule::factory()->for($instance)->create(['session_id' => 10]); // real IN_SESSION, higher id
+
+        $this->assertConflict($instance->id, SessionScheduleActionEnum::QUEUE, null, 20);
+
+        Queue::assertPushedOn('staff', CancelSession::class, fn ($job) => $job->sessionId === 20);
+    }
+
     // --- START ---
 
     public function test_promotes_an_existing_queue_schedule_to_in_session_when_starting(): void
@@ -204,6 +222,25 @@ class SessionScheduleHandlerTest extends TestCase
         $this->assertSame(1, Schedule::where('instance_id', $instance->id)->count());
         $this->assertSame(ScheduleEnum::CANCELED->value, $inSession->fresh()->type);
         Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'updated');
+    }
+
+    public function test_finishes_the_most_recent_schedule_when_a_stale_canceled_row_from_an_earlier_round_shares_the_instance(): void
+    {
+        // Nothing stops multiple Schedule rows from existing for one instance
+        // (no unique constraint, and QUEUE always inserts a fresh row when
+        // idle) — e.g. a delayed job from an earlier test round can leave a
+        // stale CANCELED row behind before CleanOldSchedules sweeps it. Since
+        // CANCELED is one of the search types for FINISH/CANCEL, that stale
+        // row must not shadow the instance's actual current schedule.
+        Event::fake();
+        $instance = Instance::factory()->create();
+        Schedule::factory()->for($instance)->canceled()->create(); // stale row, lower id
+        $current = Schedule::factory()->for($instance)->create(); // real IN_SESSION row, higher id
+
+        app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::FINISH, null, null, null);
+
+        $this->assertSame(ScheduleEnum::CANCELED->value, $current->fresh()->type);
+        Event::assertDispatched(ScheduleUpdated::class, fn ($e) => $e->action === 'updated' && $e->schedule->is($current));
     }
 
     public function test_creates_a_canceled_schedule_when_canceling_with_no_existing_schedule(): void
