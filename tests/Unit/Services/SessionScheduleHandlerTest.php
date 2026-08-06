@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 use Phobiavr\PhoberLaravelCommon\Enums\SessionScheduleActionEnum;
+use Phobiavr\PhoberLaravelCommon\Exceptions\InstanceNotFoundException;
 use Phobiavr\PhoberLaravelCommon\Exceptions\ScheduleConflictException;
 use Phobiavr\PhoberLaravelCommon\Jobs\CancelSession;
 use Phobiavr\PhoberLaravelCommon\Testing\ClearsExistingRows;
@@ -78,21 +79,24 @@ class SessionScheduleHandlerTest extends TestCase
         Queue::assertNotPushed(CancelSession::class);
     }
 
-    public function test_throws_a_conflict_and_rolls_back_its_own_session_when_a_queue_job_is_redelivered(): void
+    public function test_is_idempotent_when_a_queue_job_for_an_already_queued_session_is_redelivered(): void
     {
-        // Known trade-off: a redelivered QUEUE job for a session that's
-        // already queued hits the exact same "instance already has an
-        // active schedule" path as a genuine foreign conflict — there's no
-        // special-casing for "this active schedule is actually mine", so it
-        // still rolls back its own (valid) session via CancelSession.
+        // The active schedule already belongs to this exact session — this
+        // is our own prior success being redelivered by the queue (e.g. the
+        // worker died after committing but before the job was acknowledged),
+        // not a foreign conflict. Must be a silent no-op: no exception, no
+        // compensating cancel, no duplicate schedule.
         Event::fake();
         Queue::fake();
         $instance = Instance::factory()->create();
-        Schedule::factory()->for($instance)->queue()->create(['session_id' => 10]);
+        $existing = Schedule::factory()->for($instance)->queue()->create(['session_id' => 10]);
 
-        $this->assertConflict($instance->id, SessionScheduleActionEnum::QUEUE, null, 10);
+        app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::QUEUE, null, 10, null);
 
-        Queue::assertPushedOn('staff', CancelSession::class, fn ($job) => $job->sessionId === 10);
+        $this->assertSame(1, Schedule::where('instance_id', $instance->id)->count());
+        $this->assertSame(ScheduleEnum::QUEUE->value, $existing->fresh()->type);
+        Event::assertNotDispatched(ScheduleUpdated::class);
+        Queue::assertNotPushed(CancelSession::class);
     }
 
     // --- START ---
@@ -126,10 +130,11 @@ class SessionScheduleHandlerTest extends TestCase
 
     public function test_throws_a_conflict_when_starting_a_session_that_is_already_in_session(): void
     {
-        // Redelivery of the same START job — the schedule is already where
-        // it should be, so this fails loud instead of creating a duplicate
-        // IN_SESSION row.
+        // No session id given, so there's no way to tell whether this is our
+        // own redelivered job or a genuinely different caller — fails loud
+        // instead of silently no-op'ing or creating a duplicate IN_SESSION row.
         Event::fake();
+        Queue::fake();
         $instance = Instance::factory()->create();
         $inSession = Schedule::factory()->for($instance)->create(); // IN_SESSION by default
 
@@ -138,6 +143,39 @@ class SessionScheduleHandlerTest extends TestCase
         $this->assertSame(1, Schedule::where('instance_id', $instance->id)->count());
         $this->assertSame(ScheduleEnum::IN_SESSION->value, $inSession->fresh()->type);
         Event::assertNotDispatched(ScheduleUpdated::class);
+        Queue::assertNotPushed(CancelSession::class);
+    }
+
+    public function test_throws_a_conflict_and_rolls_back_the_session_when_starting_against_an_instance_someone_else_already_holds(): void
+    {
+        // Unlike a bare redelivery, this call carries a session id — the
+        // caller (staff-service) already flipped that session to ACTIVE and
+        // needs a compensating rollback if the device can't honor it.
+        Event::fake();
+        Queue::fake();
+        $instance = Instance::factory()->create();
+        Schedule::factory()->for($instance)->create(); // IN_SESSION by default, session_id null — someone else's
+
+        $this->assertConflict($instance->id, SessionScheduleActionEnum::START, 30, 77);
+
+        Queue::assertPushedOn('staff', CancelSession::class, fn ($job) => $job->sessionId === 77);
+    }
+
+    public function test_is_idempotent_when_a_start_job_for_an_already_started_session_is_redelivered(): void
+    {
+        // Same redelivery scenario as the QUEUE case, but for a session
+        // that's already IN_SESSION under its own id.
+        Event::fake();
+        Queue::fake();
+        $instance = Instance::factory()->create();
+        $existing = Schedule::factory()->for($instance)->create(['session_id' => 42]); // IN_SESSION by default
+
+        app(SessionScheduleHandler::class)->handle($instance->id, SessionScheduleActionEnum::START, 30, 42, null);
+
+        $this->assertSame(1, Schedule::where('instance_id', $instance->id)->count());
+        $this->assertSame(ScheduleEnum::IN_SESSION->value, $existing->fresh()->type);
+        Event::assertNotDispatched(ScheduleUpdated::class);
+        Queue::assertNotPushed(CancelSession::class);
     }
 
     // --- CANCEL / FINISH ---
@@ -206,13 +244,35 @@ class SessionScheduleHandlerTest extends TestCase
         Event::assertNotDispatched(ScheduleUpdated::class);
     }
 
-    public function test_does_nothing_when_the_instance_does_not_exist(): void
+    public function test_throws_when_the_instance_does_not_exist_and_rolls_back_the_session(): void
     {
         Event::fake();
+        Queue::fake();
 
-        app(SessionScheduleHandler::class)->handle(999999, SessionScheduleActionEnum::QUEUE, null, 1, null);
+        try {
+            app(SessionScheduleHandler::class)->handle(999999, SessionScheduleActionEnum::QUEUE, null, 1, null);
+            $this->fail('Expected InstanceNotFoundException was not thrown.');
+        } catch (InstanceNotFoundException) {
+            // expected
+        }
 
         $this->assertSame(0, Schedule::where('instance_id', 999999)->count());
         Event::assertNotDispatched(ScheduleUpdated::class);
+        Queue::assertPushedOn('staff', CancelSession::class, fn ($job) => $job->sessionId === 1);
+    }
+
+    public function test_throws_when_the_instance_does_not_exist_without_a_rollback_dispatch_when_no_session_id_is_given(): void
+    {
+        Event::fake();
+        Queue::fake();
+
+        try {
+            app(SessionScheduleHandler::class)->handle(999999, SessionScheduleActionEnum::CANCEL, null, null, null);
+            $this->fail('Expected InstanceNotFoundException was not thrown.');
+        } catch (InstanceNotFoundException) {
+            // expected
+        }
+
+        Queue::assertNotPushed(CancelSession::class);
     }
 }

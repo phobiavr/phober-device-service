@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Phobiavr\PhoberLaravelCommon\Contracts\SessionScheduleHandlerInterface;
 use Phobiavr\PhoberLaravelCommon\Enums\ScheduleEnum;
 use Phobiavr\PhoberLaravelCommon\Enums\SessionScheduleActionEnum;
+use Phobiavr\PhoberLaravelCommon\Exceptions\InstanceNotFoundException;
 use Phobiavr\PhoberLaravelCommon\Exceptions\ScheduleConflictException;
 use Phobiavr\PhoberLaravelCommon\Jobs\CancelSession;
 
@@ -20,7 +21,13 @@ readonly class SessionScheduleHandler implements SessionScheduleHandlerInterface
     {
         DB::transaction(function () use ($instanceId, $action, $time, $sessionId, $startedAt) {
             $instance = Instance::query()->whereKey($instanceId)->lockForUpdate()->first();
-            if (!$instance) return;
+            if (!$instance) {
+                if ($sessionId !== null) {
+                    CancelSession::dispatch($sessionId)->onQueue('staff');
+                }
+
+                throw new InstanceNotFoundException("Instance {$instanceId} does not exist.");
+            }
 
             if ($action === SessionScheduleActionEnum::QUEUE) {
                 /** @var Schedule|null $active */
@@ -31,6 +38,12 @@ readonly class SessionScheduleHandler implements SessionScheduleHandlerInterface
                     ->first(fn(Schedule $schedule) => $schedule->isActive());
 
                 if ($active) {
+                    if ($sessionId !== null && $active->session_id === $sessionId) {
+                        // Redelivery of our own successful QUEUE job — the schedule
+                        // it created is already sitting there. Idempotent no-op.
+                        return;
+                    }
+
                     if ($sessionId !== null) {
                         CancelSession::dispatch($sessionId)->onQueue('staff');
                     }
@@ -62,6 +75,16 @@ readonly class SessionScheduleHandler implements SessionScheduleHandlerInterface
                 ->first();
 
             if ($queued?->type === $type->value) {
+                if ($sessionId !== null && $queued->session_id === $sessionId) {
+                    // Redelivery of our own successful job — already in the
+                    // state we were asked to reach. Idempotent no-op.
+                    return;
+                }
+
+                if ($sessionId !== null) {
+                    CancelSession::dispatch($sessionId)->onQueue('staff');
+                }
+
                 throw new ScheduleConflictException('Schedule is already in the requested state.');
             }
 
